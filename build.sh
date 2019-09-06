@@ -31,22 +31,22 @@ fi
 
 # Update base images
 for baseimage in centos:7 debian:stretch alpine:3.10; do
-  docker pull $baseimage
+  sudo docker pull $baseimage
 done
 
 # Windows (x64)
 if [ $PLATFORM = "all" ] || [ $PLATFORM = "win32-x64" ]; then
   echo "Building win32-x64..."
-  docker build -t vips-dev-win32-x64 win32-x64
-  docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-win32-x64 sh -c "/packaging/build/win.sh"
+  sudo docker build -t vips-dev-win32-x64 win32-x64
+  sudo docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-win32-x64 sh -c "/packaging/build/win.sh"
 fi
 
 # Linux (x64, ARMv6, ARMv7, ARM64v8)
 for flavour in linux-x64 linuxmusl-x64 linux-armv6 linux-armv7 linux-arm64v8; do
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
-    docker build -t vips-dev-$flavour $flavour
-    docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-$flavour sh -c "/packaging/build/lin.sh"
+    sudo docker build -t vips-dev-$flavour $flavour
+    sudo docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-$flavour sh -c "/packaging/build/lin.sh"
   fi
 done
 
