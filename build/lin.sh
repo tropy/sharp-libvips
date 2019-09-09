@@ -8,7 +8,7 @@ mkdir ${DEPS}
 mkdir ${TARGET}
 
 # Common build paths and flags
-export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${TARGET}/lib/pkgconfig"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${TARGET}/lib/pkgconfig:${TARGET}/share/pkgconfig"
 export PATH="${PATH}:${TARGET}/bin"
 export CPPFLAGS="-I${TARGET}/include"
 export LDFLAGS="-L${TARGET}/lib -Wl,-rpath,'\$\$ORIGIN'"
@@ -41,6 +41,8 @@ VERSION_PANGO=1.42.4
 VERSION_CROCO=0.6.13
 VERSION_SVG=2.45.5
 VERSION_GIF=5.1.4
+VERSION_POPPLER=0.80.0
+VERSION_POPPLER_DATA=0.4.9
 
 # Least out-of-sync Sourceforge mirror
 SOURCEFORGE_BASE_URL=https://netix.dl.sourceforge.net/project/
@@ -84,6 +86,8 @@ version_latest "fribidi" "$VERSION_FRIBIDI" "857"
 version_latest "croco" "$VERSION_CROCO" "11787"
 #version_latest "svg" "$VERSION_SVG" "5420" latest version fails to link against latest cairo
 #version_latest "gif" "$VERSION_GIF" "1158" # v5.1.5+ provides a Makefile only so will require custom cross-compilation setup
+version_latest "poppler" "$VERSION_POPPLER" "3686"
+version_latest "poppler-data" "$VERSION_POPPLER_DATA" "3687"
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
@@ -275,6 +279,24 @@ cd ${DEPS}/gif
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
 
+mkdir ${DEPS}/poppler-data
+curl -Ls https://poppler.freedesktop.org/poppler-data-${VERSION_POPPLER_DATA}.tar.gz | tar xzC ${DEPS}/poppler-data --strip-components=1
+cd ${DEPS}/poppler-data
+make install prefix=${TARGET}
+
+mkdir -p ${DEPS}/poppler/build
+curl -Ls https://poppler.freedesktop.org/poppler-${VERSION_POPPLER}.tar.xz | tar xJC ${DEPS}/poppler --strip-components=1
+cd ${DEPS}/poppler/build
+# Skip building and linking pdf-fullrewrite binary!
+sed -i "s/add_subdirectory(test)//" ../CMakeLists.txt
+cmake .. -G"Unix Makefiles" \
+  -DCMAKE_TOOLCHAIN_FILE=/root/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
+  -DBUILD_SHARED_LIBS=ON -DENABLE_GLIB=ON \
+  -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_QT5=OFF -DENABLE_CPP=OFF \
+  -DENABLE_LIBCURL=OFF -DENABLE_ZLIB_UNCOMPRESS=ON -DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_LIBOPENJPEG=unmaintained \
+  -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_CPP_TESTS=OFF
+make install/strip
+
 mkdir ${DEPS}/vips
 curl -Ls https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
@@ -290,6 +312,8 @@ cd ${TARGET}/include
 rm -rf vips/vipsc++.h vips/vipscpp.h
 cd ${TARGET}/lib
 rm -rf pkgconfig .libs *.la libvipsCC*
+cd ${TARGET}/share
+rm -rf pkgconfig
 
 # Create JSON file of version numbers
 cd ${TARGET}
@@ -313,6 +337,8 @@ printf "{\n\
   \"orc\": \"${VERSION_ORC}\",\n\
   \"pango\": \"${VERSION_PANGO}\",\n\
   \"pixman\": \"${VERSION_PIXMAN}\",\n\
+  \"poppler\": \"${VERSION_POPPLER}\",\n\
+  \"poppler-data\": \"${VERSION_POPPLER_DATA}\",\n\
   \"png\": \"${VERSION_PNG16}\",\n\
   \"svg\": \"${VERSION_SVG}\",\n\
   \"tiff\": \"${VERSION_TIFF}\",\n\
@@ -325,5 +351,5 @@ printf "{\n\
 printf "\"${PLATFORM}\"" >platform.json
 
 # Create .tar.gz
-tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz include lib *.json
+tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz include lib share *.json
 advdef --recompress --shrink-insane /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz
