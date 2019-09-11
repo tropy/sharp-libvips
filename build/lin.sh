@@ -43,6 +43,8 @@ VERSION_SVG=2.45.5
 VERSION_GIF=5.1.4
 VERSION_POPPLER=0.80.0
 VERSION_POPPLER_DATA=0.4.9
+VERSION_HEIF=1.5.1
+VERSION_DE265=1.0.3
 
 # Least out-of-sync Sourceforge mirror
 SOURCEFORGE_BASE_URL=https://netix.dl.sourceforge.net/project/
@@ -297,6 +299,20 @@ cmake .. -G"Unix Makefiles" \
   -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_CPP_TESTS=OFF
 make install/strip
 
+mkdir ${DEPS}/de265
+curl -Ls https://github.com/strukturag/libde265/releases/download/v${VERSION_DE265}/libde265-${VERSION_DE265}.tar.gz | tar xzC ${DEPS}/de265 --strip-components=1
+cd ${DEPS}/de265
+./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
+  --disable-dec265 --disable-sherlock265
+make install-strip
+
+mkdir ${DEPS}/heif
+curl -Ls https://github.com/strukturag/libheif/releases/download/v${VERSION_HEIF}/libheif-${VERSION_HEIF}.tar.gz | tar xzC ${DEPS}/heif --strip-components=1
+cd ${DEPS}/heif
+./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
+  --disable-examples --disable-go --disable-gdk-pixbuf
+make install-strip
+
 mkdir ${DEPS}/vips
 curl -Ls https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
@@ -320,6 +336,7 @@ cd ${TARGET}
 printf "{\n\
   \"cairo\": \"${VERSION_CAIRO}\",\n\
   \"croco\": \"${VERSION_CROCO}\",\n\
+  \"de265\": \"${VERSION_DE265}\",\n\
   \"exif\": \"${VERSION_EXIF}\",\n\
   \"expat\": \"${VERSION_EXPAT}\",\n\
   \"ffi\": \"${VERSION_FFI}\",\n\
@@ -332,6 +349,7 @@ printf "{\n\
   \"glib\": \"${VERSION_GLIB}\",\n\
   \"gsf\": \"${VERSION_GSF}\",\n\
   \"harfbuzz\": \"${VERSION_HARFBUZZ}\",\n\
+  \"heif\": \"${VERSION_HEIF}\",\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"orc\": \"${VERSION_ORC}\",\n\
