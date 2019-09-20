@@ -20,7 +20,19 @@ RUN \
     jq \
     nasm \
     prelink \
-  && curl https://sh.rustup.rs -sSf | sh -s -- -y \
+    libtool-ltdl-devel \
+    libxml2-devel \
+    libgsf-devel \
+    libffi-devel \
+    librsvg-devel \
+    fftw-devel \
+    freetype-devel \
+    gdk-pixbuf2-devel \
+    openjpeg2-devel \
+    orc-devel \
+    harfbuzz \
+    cairo-devel \
+#  && curl https://sh.rustup.rs -sSf | sh -s -- -y \
   && ln -s /usr/bin/cmake3 /usr/bin/cmake
 
 # Compiler settings
