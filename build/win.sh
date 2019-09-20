@@ -7,8 +7,8 @@ VERSION_VIPS_MINOR=$(echo $VERSION_VIPS | cut -d. -f2)
 # Fetch and unzip
 mkdir /vips
 cd /vips
-curl -LO https://github.com/lovell/build-win64/releases/download/v${VERSION_VIPS}/vips-dev-w64-web-${VERSION_VIPS}.zip
-unzip vips-dev-w64-web-${VERSION_VIPS}.zip
+curl -LO https://github.com/inukshuk/build-win64/releases/download/v${VERSION_VIPS}/vips-dev-w64-tropy-${VERSION_VIPS}.zip
+unzip vips-dev-w64-tropy-${VERSION_VIPS}.zip
 
 # Clean and zip
 cd /vips/vips-dev-${VERSION_VIPS_MAJOR}.${VERSION_VIPS_MINOR}
@@ -19,7 +19,7 @@ cp bin/*.dll lib/
 printf "\"${PLATFORM}\"" >platform.json
 
 # Create versions.json
-curl -LO https://raw.githubusercontent.com/lovell/build-win64/v${VERSION_VIPS}/${VERSION_VIPS_MAJOR}.${VERSION_VIPS_MINOR}/vips.modules
+curl -LO https://raw.githubusercontent.com/inukshuk/build-win64/v${VERSION_VIPS}/${VERSION_VIPS_MAJOR}.${VERSION_VIPS_MINOR}/vips.modules
 version_of() {
   xmllint --xpath "string(/moduleset/autotools[@id='$1']/branch/@version | /moduleset/cmake[@id='$1']/branch/@version | /moduleset/meson[@id='$1']/branch/@version)" vips.modules
 }
@@ -40,9 +40,10 @@ printf "{\n\
   \"harfbuzz\": \"$(version_of harfbuzz)\",\n\
   \"jpeg\": \"$(version_of libjpeg-turbo)\",\n\
   \"lcms\": \"$(version_of lcms)\",\n\
-  \"pango\": \"$(version_of pango)\",\n\
+  \"imagemagick\": \"$(version_of imagemagick)\",\n\
   \"pixman\": \"$(version_of pixman)\",\n\
   \"png\": \"$(version_of libpng)\",\n\
+  \"poppler\": \"$(version_of poppler)\",\n\
   \"svg\": \"$(version_of librsvg)\",\n\
   \"tiff\": \"$(version_of tiff)\",\n\
   \"vips\": \"${VERSION_VIPS}\",\n\
