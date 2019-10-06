@@ -24,6 +24,7 @@ VERSION_GSF=1.14.46
 VERSION_EXIF=0.6.21
 VERSION_LCMS2=2.9
 VERSION_JPEG=2.0.3
+VERSION_JP2=2.3.1
 VERSION_PNG16=1.6.37
 VERSION_WEBP=1.0.3
 VERSION_TIFF=4.0.10
@@ -41,11 +42,11 @@ VERSION_TIFF=4.0.10
 #VERSION_CROCO=0.6.13
 #VERSION_SVG=2.45.5
 VERSION_GIF=5.1.4
-VERSION_POPPLER=0.80.0
+VERSION_POPPLER=0.81.0
 #VERSION_POPPLER_DATA=0.4.9
 VERSION_HEIF=1.5.1
 VERSION_DE265=1.0.3
-VERSION_IMAGEMAGICK="6.9.10-65"
+VERSION_IMAGEMAGICK="6.9.10-68"
 
 # Least out-of-sync Sourceforge mirror
 SOURCEFORGE_BASE_URL=https://netix.dl.sourceforge.net/project/
@@ -282,6 +283,14 @@ cd ${DEPS}/gif
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
 
+mkdir -p ${DEPS}/openjpeg/build
+curl -Ls https://github.com/uclouvain/openjpeg/archive/v${VERSION_JP2}.tar.gz | tar xzC ${DEPS}/openjpeg --strip-components=1
+cd ${DEPS}/openjpeg/build
+cmake .. -G"Unix Makefiles" \
+  -DCMAKE_TOOLCHAIN_FILE=/root/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
+  -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+make install/strip
+
 #mkdir ${DEPS}/poppler-data
 #curl -Ls https://poppler.freedesktop.org/poppler-data-${VERSION_POPPLER_DATA}.tar.gz | tar xzC ${DEPS}/poppler-data --strip-components=1
 #cd ${DEPS}/poppler-data
@@ -317,8 +326,10 @@ make install-strip
 mkdir ${DEPS}/imagemagick
 curl -Ls https://imagemagick.org/download/ImageMagick-${VERSION_IMAGEMAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
 cd ${DEPS}/imagemagick
-./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
-  --without-x --without-lzma --with-modules --without-openexr --without-heic --without-gvc --without-lqr \
+LIBOPENJP2_LIBS=-lopenjp2 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
+  --with-openjp2 \
+  --without-x --without-lzma --without-modules --without-openexr --without-heic --without-gvc --without-lqr \
+  --without-fontconfig --without-freetype --without-xml --without-pango \
   --without-magick-plus-plus --disable-largefile --without-rsvg --without-zlib --disable-openmp --without-webp
 make install-strip
 
@@ -342,6 +353,12 @@ rm -rf pkgconfig .libs *.la libvipsCC*
 cd ${TARGET}/share
 rm -rf pkgconfig
 
+${TARGET}/bin/identify -list format
+echo
+ldd ${TARGET}/lib/libMagickCore-6.Q16.so
+echo
+readelf -d ${TARGET}/lib/libMagickCore-6.Q16.so
+
 # Create JSON file of version numbers
 cd ${TARGET}
 printf "{\n\
@@ -353,6 +370,7 @@ printf "{\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"imagemagick\": \"${VERSION_IMAGEMAGICK}\",\n\
+  \"openjpeg\": \"${VERSION_JP2}\",\n\
   \"png\": \"${VERSION_PNG16}\",\n\
   \"tiff\": \"${VERSION_TIFF}\",\n\
   \"vips\": \"${VERSION_VIPS}\",\n\

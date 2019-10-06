@@ -28,7 +28,6 @@ RUN \
     fftw-devel \
     freetype-devel \
     gdk-pixbuf2-devel \
-    openjpeg2-devel \
     orc-devel \
     harfbuzz \
     cairo-devel \
