@@ -357,18 +357,32 @@ rm -rf pkgconfig
 # Create JSON file of version numbers
 cd ${TARGET}
 printf "{\n\
+  \"cairo\": \"$(pkg-config --modversion cairo)\",\n\
+  \"croco\": \"$(pkg-config --modversion libcroco-0.6)\",\n\
   \"de265\": \"${VERSION_DE265}\",\n\
   \"exif\": \"${VERSION_EXIF}\",\n\
+  \"fontconfig\": \"$(pkg-config --modversion fontconfig)\",\n\
+  \"freetype\": \"$(pkg-config --modversion freetype2)\",\n\
+  \"fribidi\": \"$(pkg-config --modversion fribidi)\",\n\
+  \"gdkpixbuf\": \"$(pkg-config --modversion gdk-pixbuf-2.0)\",\n\
   \"gif\": \"${VERSION_GIF}\",\n\
+  \"glib\": \"$(pkg-config --modversion glib-2.0)\",\n\
+  \"gsf\": \"$(pkg-config --modversion libgsf-1)\",\n\
+  \"harfbuzz\": \"$(pkg-config --modversion harfbuzz)\",\n\
   \"heif\": \"${VERSION_HEIF}\",\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"imagemagick\": \"${VERSION_IMAGEMAGICK}\",\n\
   \"openjpeg\": \"${VERSION_JP2}\",\n\
+  \"svg\": \"$(pkg-config --modversion orc-0.4)\",\n\
   \"png\": \"${VERSION_PNG16}\",\n\
+  \"pango\": \"$(pkg-config --modversion pango)\",\n\
+  \"pixman\": \"$(pkg-config --modversion pixman-1)\",\n\
+  \"svg\": \"$(pkg-config --modversion librsvg-2.0)\",\n\
   \"tiff\": \"${VERSION_TIFF}\",\n\
   \"vips\": \"${VERSION_VIPS}\",\n\
   \"webp\": \"${VERSION_WEBP}\",\n\
+  \"xml\": \"$(pkg-config --modversion libxml-2.0)\",\n\
 }" >versions.json
 
 printf "\"${PLATFORM}\"" >platform.json
