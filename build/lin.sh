@@ -20,7 +20,7 @@ export CXXFLAGS="${FLAGS}"
 #VERSION_FFI=3.2.1
 #VERSION_GLIB=2.56.4
 #VERSION_XML2=2.9.9
-VERSION_GSF=1.14.46
+#VERSION_GSF=1.14.46
 VERSION_EXIF=0.6.21
 VERSION_LCMS2=2.9
 VERSION_JPEG=2.0.3
@@ -69,7 +69,7 @@ version_latest() {
 #version_latest "ffi" "$VERSION_FFI" "1611"
 #version_latest "glib" "$VERSION_GLIB" "10024" # latest version requires meson instead of autotools
 #version_latest "xml2" "$VERSION_XML2" "1783"
-version_latest "gsf" "$VERSION_GSF" "1980"
+#version_latest "gsf" "$VERSION_GSF" "1980"
 version_latest "exif" "$VERSION_EXIF" "1607"
 version_latest "lcms2" "$VERSION_LCMS2" "9815"
 version_latest "jpeg" "$VERSION_JPEG" "1648"
@@ -137,12 +137,12 @@ if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 #  --without-pattern --without-push --without-regexps --without-schemas --without-schematron --with-zlib=${TARGET}
 #make install-strip
 
-mkdir ${DEPS}/gsf
-curl -Lks https://download.gnome.org/sources/libgsf/$(without_patch $VERSION_GSF)/libgsf-${VERSION_GSF}.tar.xz | tar xJC ${DEPS}/gsf --strip-components=1
-cd ${DEPS}/gsf
-./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
-  --without-bz2 --without-gdk-pixbuf
-make install-strip
+#mkdir ${DEPS}/gsf
+#curl -Lks https://download.gnome.org/sources/libgsf/$(without_patch $VERSION_GSF)/libgsf-${VERSION_GSF}.tar.xz | tar xJC ${DEPS}/gsf --strip-components=1
+#cd ${DEPS}/gsf
+#./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
+#  --without-bz2 --without-gdk-pixbuf
+#make install-strip
 
 mkdir ${DEPS}/exif
 curl -Ls ${SOURCEFORGE_BASE_URL}libexif/libexif/${VERSION_EXIF}/libexif-${VERSION_EXIF}.tar.bz2 | tar xjC ${DEPS}/exif --strip-components=1
@@ -340,7 +340,8 @@ cd ${DEPS}/vips
   --disable-debug --disable-introspection --without-python \
   --without-pangoft2 --without-ppm --without-analyze --without-radiance \
   --without-openslide --without-cfitsio --without-matio --without-imagequant --without-pdfium \
-  --without-OpenEXR --without-nifti \
+  --without-OpenEXR --without-nifti --without-gsf --without-x \
+  --with-rsvg --with-webp --with-tiff --with-poppler --with-magick --with-heif \
   --with-giflib-includes=${TARGET}/include --with-giflib-libraries=${TARGET}/lib \
   --with-jpeg-includes=${TARGET}/include --with-jpeg-libraries=${TARGET}/lib
 make install-strip
@@ -353,19 +354,12 @@ rm -rf pkgconfig .libs *.la libvipsCC*
 cd ${TARGET}/share
 rm -rf pkgconfig
 
-${TARGET}/bin/identify -list format
-echo
-ldd ${TARGET}/lib/libMagickCore-6.Q16.so
-echo
-readelf -d ${TARGET}/lib/libMagickCore-6.Q16.so
-
 # Create JSON file of version numbers
 cd ${TARGET}
 printf "{\n\
   \"de265\": \"${VERSION_DE265}\",\n\
   \"exif\": \"${VERSION_EXIF}\",\n\
   \"gif\": \"${VERSION_GIF}\",\n\
-  \"gsf\": \"${VERSION_GSF}\",\n\
   \"heif\": \"${VERSION_HEIF}\",\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\

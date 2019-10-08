@@ -22,16 +22,16 @@ RUN \
     prelink \
     libtool-ltdl-devel \
     libxml2-devel \
-    libgsf-devel \
+    # libgsf-devel \
     libffi-devel \
-    librsvg-devel \
+    librsvg2-devel \
     fftw-devel \
     freetype-devel \
     gdk-pixbuf2-devel \
     orc-devel \
     harfbuzz \
     cairo-devel \
-#  && curl https://sh.rustup.rs -sSf | sh -s -- -y \
+  # && curl https://sh.rustup.rs -sSf | sh -s -- -y \
   && ln -s /usr/bin/cmake3 /usr/bin/cmake
 
 # Compiler settings
