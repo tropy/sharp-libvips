@@ -29,7 +29,6 @@ RUN \
     freetype-devel \
     gdk-pixbuf2-devel \
     orc-devel \
-    harfbuzz \
     cairo-devel \
   # && curl https://sh.rustup.rs -sSf | sh -s -- -y \
   && ln -s /usr/bin/cmake3 /usr/bin/cmake

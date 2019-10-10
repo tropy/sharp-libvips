@@ -326,22 +326,62 @@ make install-strip
 mkdir ${DEPS}/imagemagick
 curl -Ls https://imagemagick.org/download/ImageMagick-${VERSION_IMAGEMAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
 cd ${DEPS}/imagemagick
-LIBOPENJP2_LIBS=-lopenjp2 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
+./configure \
+  --host=${CHOST} \
+  --prefix=${TARGET} \
+  --enable-shared \
+  --disable-static \
+  --disable-dependency-tracking \
+  --disable-largefile \
+  --disable-openmp \
   --with-openjp2 \
-  --without-x --without-lzma --without-modules --without-openexr --without-heic --without-gvc --without-lqr \
-  --without-fontconfig --without-freetype --without-xml --without-pango \
-  --without-magick-plus-plus --disable-largefile --without-rsvg --without-zlib --disable-openmp --without-webp
+  --without-fontconfig \
+  --without-freetype \
+  --without-gvc \
+  --without-heic \
+  --without-lqr \
+  --without-lzma \
+  --without-magick-plus-plus \
+  --without-modules \
+  --without-openexr \
+  --without-pango \
+  --without-rsvg \
+  --without-webp
+  --without-x \
+  --without-xml \
+  --without-zlib \
 make install-strip
 
 mkdir ${DEPS}/vips
 curl -Ls https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
-./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
-  --disable-debug --disable-introspection --without-python \
-  --without-pangoft2 --without-ppm --without-analyze --without-radiance \
-  --without-openslide --without-cfitsio --without-matio --without-imagequant --without-pdfium \
-  --without-OpenEXR --without-nifti --without-gsf --without-x \
-  --with-rsvg --with-webp --with-tiff --with-poppler --with-magick --with-heif \
+./configure \
+  --host=${CHOST} \
+  --prefix=${TARGET} \
+  --enable-shared \
+  --disable-static \
+  --disable-dependency-tracking \
+  --disable-debug \
+  --disable-introspection \
+  --without-OpenEXR \
+  --without-analyze \
+  --without-cfitsio \
+  --without-gsf \
+  --without-imagequant \
+  --without-matio \
+  --without-nifti \
+  --without-openslide \
+  --without-pangoft2 \
+  --without-pdfium \
+  --without-ppm \
+  --without-radiance \
+  --without-x \
+  --with-heif \
+  --with-libwebp \
+  --with-magick \
+  --with-poppler \
+  --with-rsvg \
+  --with-tiff \
   --with-giflib-includes=${TARGET}/include --with-giflib-libraries=${TARGET}/lib \
   --with-jpeg-includes=${TARGET}/include --with-jpeg-libraries=${TARGET}/lib
 make install-strip
@@ -357,26 +397,21 @@ rm -rf pkgconfig
 # Create JSON file of version numbers
 cd ${TARGET}
 printf "{\n\
-  \"cairo\": \"$(pkg-config --modversion cairo)\",\n\
-  \"croco\": \"$(pkg-config --modversion libcroco-0.6)\",\n\
   \"de265\": \"${VERSION_DE265}\",\n\
   \"exif\": \"${VERSION_EXIF}\",\n\
+  \"fftw\": \"$(pkg-config --modversion fftw3)\",\n\
   \"fontconfig\": \"$(pkg-config --modversion fontconfig)\",\n\
   \"freetype\": \"$(pkg-config --modversion freetype2)\",\n\
-  \"fribidi\": \"$(pkg-config --modversion fribidi)\",\n\
   \"gdkpixbuf\": \"$(pkg-config --modversion gdk-pixbuf-2.0)\",\n\
   \"gif\": \"${VERSION_GIF}\",\n\
   \"glib\": \"$(pkg-config --modversion glib-2.0)\",\n\
-  \"gsf\": \"$(pkg-config --modversion libgsf-1)\",\n\
-  \"harfbuzz\": \"$(pkg-config --modversion harfbuzz)\",\n\
   \"heif\": \"${VERSION_HEIF}\",\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"imagemagick\": \"${VERSION_IMAGEMAGICK}\",\n\
   \"openjpeg\": \"${VERSION_JP2}\",\n\
-  \"svg\": \"$(pkg-config --modversion orc-0.4)\",\n\
-  \"png\": \"${VERSION_PNG16}\",\n\
-  \"pango\": \"$(pkg-config --modversion pango)\",\n\
+  \"orc\": \"$(pkg-config --modversion orc-0.4)\",\n\
+  \"png\": \"${VERSION_PNG}\",\n\
   \"pixman\": \"$(pkg-config --modversion pixman-1)\",\n\
   \"svg\": \"$(pkg-config --modversion librsvg-2.0)\",\n\
   \"tiff\": \"${VERSION_TIFF}\",\n\
