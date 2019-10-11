@@ -13,10 +13,6 @@ if [ $# -lt 1 ]; then
   echo "Possible values for PLATFORM are:"
   echo "- win32-x64"
   echo "- linux-x64"
-  echo "- linuxmusl-x64"
-  echo "- linux-armv6"
-  echo "- linux-armv7"
-  echo "- linux-arm64v8"
   echo
   exit 1
 fi
@@ -41,14 +37,12 @@ if [ $PLATFORM = "all" ] || [ $PLATFORM = "win32-x64" ]; then
   sudo docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-win32-x64 sh -c "/packaging/build/win.sh"
 fi
 
-# Linux (x64, ARMv6, ARMv7, ARM64v8)
-for flavour in linux-x64 linuxmusl-x64 linux-armv6 linux-armv7 linux-arm64v8; do
-  if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
-    echo "Building $flavour..."
-    sudo docker build -t vips-dev-$flavour $flavour
-    sudo docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-$flavour sh -c "/packaging/build/lin.sh"
-  fi
-done
+# Linux (x64)
+if [ $PLATFORM = "all" ] || [ $PLATFORM = "linux-x64" ]; then
+  echo "Building linux-x64..."
+  sudo docker build -t vips-dev-linux-x64 linux-x64
+  sudo docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-linux-x64 sh -c "/packaging/build/lin.sh"
+fi
 
 # Display checksums
 sha256sum *.tar.gz
