@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # Working directories
@@ -346,10 +346,10 @@ cd ${DEPS}/imagemagick
   --without-openexr \
   --without-pango \
   --without-rsvg \
-  --without-webp
+  --without-webp \
   --without-x \
   --without-xml \
-  --without-zlib \
+  --without-zlib
 make install-strip
 
 mkdir ${DEPS}/vips
@@ -394,6 +394,7 @@ rm -rf pkgconfig .libs *.la libvipsCC*
 cd ${TARGET}/share
 rm -rf pkgconfig
 
+
 # Create JSON file of version numbers
 cd ${TARGET}
 printf "{\n\
@@ -421,6 +422,18 @@ printf "{\n\
 }" >versions.json
 
 printf "\"${PLATFORM}\"" >platform.json
+
+# Pack only the relevant shared libraries
+cd ${TARGET}/lib
+mkdir ${TARGET}/xlib
+cp -L libvips-cpp.so.42 ${TARGET}/xlib
+while read dep; do
+  cp -L $dep ${TARGET}/xlib/$dep
+  echo lib/$dep
+done < <(ldd libvips-cpp.so.42 | grep ${TARGET}/lib | cut -d '=' -f1 | awk '{print $1}')
+cd ${TARGET}
+rm -rf lib
+mv xlib lib
 
 # Create .tar.gz
 tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz include lib share *.json
