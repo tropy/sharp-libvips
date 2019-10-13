@@ -1,0 +1,37 @@
+language: generic
+
+os: osx
+osx_image: xcode9.3
+
+env:
+  global:
+    - COLUMNS=240
+    - HOMEBREW_NO_AUTO_UPDATE=1
+    - HOMEBREW_NO_INSTALL_CLEANUP=1
+    - KEEP_PACKAGES="cmake gdbm gettext giflib git libffi libpng libxml2 openssl openssl@1.1 pcre pkg-config python readline sqlite xz"
+
+before_install:
+  - brew cleanup
+  # Remove pre-installed Travis packages
+  # See: https://github.com/travis-ci/packer-templates-mac/blob/master/playbooks/roles/homebrew/defaults/main.yml
+  - brew list -1 | grep -Ev ${KEEP_PACKAGES// /|} | xargs brew rm --force
+  - brew update
+  - brew upgrade
+
+install:
+  - brew install advancecomp
+  - brew tap tropy/libvips
+  - brew install tropy/libvips libvips
+
+script:
+  - ./build/mac.sh
+
+before_cache:
+  - brew cleanup
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
+
+#addons:
+#  artifacts:
+#    s3_region: eu-west-1
