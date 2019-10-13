@@ -14,6 +14,7 @@ cd $TARGET
 rm -rf lib include
 mkdir lib include
 
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(brew --prefix libffi)/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(brew --prefix jpeg-turbo)/lib/pkgconfig"
 
 # Use pkg-config to automagically find and copy necessary header files
