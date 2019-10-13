@@ -21,7 +21,7 @@ before_install:
 install:
   - brew install advancecomp
   - brew tap tropy/libvips
-  - brew install tropy/libvips/libvips
+  - brew install -v tropy/libvips/libvips
 
 script:
   - ./build/mac.sh
