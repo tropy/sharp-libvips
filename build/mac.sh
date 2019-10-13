@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 if [ $(uname) != "Darwin" ]; then
   echo "Please run this on macOS"
@@ -15,10 +14,12 @@ cd $TARGET
 rm -rf lib include
 mkdir lib include
 
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(brew --prefix jpeg-turbo)/lib/pkgconfig"
+
 # Use pkg-config to automagically find and copy necessary header files
 for path in $(pkg-config --cflags --static vips-cpp libcroco-0.6 | tr ' ' '\n' | grep '^-I' | cut -c 3- | sort | uniq); do
-  cp -R ${path}/ include;
-done;
+  cp -R ${path}/ include
+done
 rm include/gettext-po.h
 
 # Manually copy header files for giflib
