@@ -8,7 +8,7 @@ mkdir ${DEPS}
 mkdir ${TARGET}
 
 # Common build paths and flags
-export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${TARGET}/lib/pkgconfig:${TARGET}/share/pkgconfig"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${TARGET}/lib/pkgconfig"
 export PATH="${PATH}:${TARGET}/bin"
 export CPPFLAGS="-I${TARGET}/include"
 export LDFLAGS="-L${TARGET}/lib -Wl,-rpath,'\$\$ORIGIN'"
@@ -386,15 +386,6 @@ cd ${DEPS}/vips
   --with-jpeg-includes=${TARGET}/include --with-jpeg-libraries=${TARGET}/lib
 make install-strip
 
-# Remove the old C++ bindings
-cd ${TARGET}/include
-rm -rf vips/vipsc++.h vips/vipscpp.h
-cd ${TARGET}/lib
-rm -rf pkgconfig .libs *.la libvipsCC*
-cd ${TARGET}/share
-rm -rf pkgconfig
-
-
 # Create JSON file of version numbers
 cd ${TARGET}
 printf "{\n\
@@ -424,17 +415,27 @@ printf "{\n\
 printf "\"${PLATFORM}\"" >platform.json
 
 # Pack only the relevant shared libraries
+mkdir ${TARGET}/x-lib
 cd ${TARGET}/lib
-mkdir ${TARGET}/xlib
-cp -L libvips-cpp.so.42 ${TARGET}/xlib
+cp -L libvips-cpp.so.42 ${TARGET}/x-lib
 while read dep; do
-  cp -L $dep ${TARGET}/xlib/$dep
+  cp -L $dep ${TARGET}/x-lib/$dep
   echo lib/$dep
 done < <(ldd libvips-cpp.so.42 | grep ${TARGET}/lib | cut -d '=' -f1 | awk '{print $1}')
+
 cd ${TARGET}
 rm -rf lib
-mv xlib lib
+mv x-lib lib
+
+# Remove the old C++ bindings
+cd ${TARGET}/include
+rm -rf vips/vipsc++.h vips/vipscpp.h
+cd ${TARGET}/lib
+rm -rf .libs *.la libvipsCC*
+cd ${TARGET}/share
+rm -rf pkgconfig
 
 # Create .tar.gz
+cd ${TARGET}
 tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz include lib *.json
 advdef --recompress --shrink-insane /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz
