@@ -21,7 +21,11 @@ before_install:
 install:
   - brew install advancecomp
   - brew tap tropy/libvips
-  - brew install -v tropy/libvips/libvips
+  - brew install tropy/libvips/gdk-pixbuf2 --build-bottle
+  - brew postinstall tropy/libvips/gdk-pixbuf2
+  - brew install tropy/libvips/poppler8 --build-bottle
+  - brew install tropy/libvips/imagemagick6 --build-bottle
+  - brew install tropy/libvips/libvips --build-bottle
 
 script:
   - ./build/mac.sh
