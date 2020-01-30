@@ -26,7 +26,7 @@ if ! type docker >/dev/null; then
 fi
 
 # Update base images
-for baseimage in centos:7 debian:stretch alpine:3.10; do
+for baseimage in centos:7 debian:stretch alpine:3.11; do
   sudo docker pull $baseimage
 done
 

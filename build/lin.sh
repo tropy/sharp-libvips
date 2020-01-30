@@ -11,45 +11,41 @@ mkdir ${TARGET}
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${TARGET}/lib/pkgconfig"
 export PATH="${PATH}:${TARGET}/bin"
 export CPPFLAGS="-I${TARGET}/include"
-export LDFLAGS="-L${TARGET}/lib -Wl,-rpath,'\$\$ORIGIN'"
+export LDFLAGS="-L${TARGET}/lib"
 export CFLAGS="${FLAGS}"
 export CXXFLAGS="${FLAGS}"
 
 # Dependency version numbers
 #VERSION_ZLIB=1.2.11
-#VERSION_FFI=3.2.1
-#VERSION_GLIB=2.56.4
-#VERSION_XML2=2.9.9
+#VERSION_FFI=3.3
+#VERSION_GLIB=2.63.2
+#VERSION_XML2=2.9.10
 #VERSION_GSF=1.14.46
 VERSION_EXIF=0.6.21
 VERSION_LCMS2=2.9
-VERSION_JPEG=2.0.3
+VERSION_JPEG=2.0.4
 VERSION_JP2=2.3.1
 VERSION_PNG16=1.6.37
-VERSION_WEBP=1.0.3
-VERSION_TIFF=4.0.10
-#VERSION_ORC=0.4.28
+VERSION_WEBP=1.1.0
+VERSION_TIFF=4.1.0
+#VERSION_ORC=0.4.29
 #VERSION_GETTEXT=0.20.1
-#VERSION_GDKPIXBUF=2.36.12
+#VERSION_GDKPIXBUF=2.40.0
 #VERSION_FREETYPE=2.10.1
-#VERSION_EXPAT=2.2.7
+#VERSION_EXPAT=2.2.8
 #VERSION_FONTCONFIG=2.13.92
 #VERSION_HARFBUZZ=2.6.1
 #VERSION_PIXMAN=0.38.4
 #VERSION_CAIRO=1.17.2
 #VERSION_FRIBIDI=1.0.5
 #VERSION_PANGO=1.42.4
-#VERSION_CROCO=0.6.13
-#VERSION_SVG=2.45.5
+#VERSION_SVG=2.64.4
 VERSION_GIF=5.1.4
-VERSION_POPPLER=0.81.0
+VERSION_POPPLER=0.85.0
 #VERSION_POPPLER_DATA=0.4.9
 VERSION_HEIF=1.5.1
 VERSION_DE265=1.0.3
-VERSION_IMAGEMAGICK="6.9.10-68"
-
-# Least out-of-sync Sourceforge mirror
-SOURCEFORGE_BASE_URL=https://netix.dl.sourceforge.net/project/
+VERSION_IMAGEMAGICK="6.9.10-90"
 
 # Remove patch version component
 without_patch() {
@@ -87,7 +83,6 @@ version_latest "tiff" "$VERSION_TIFF" "13521"
 #version_latest "cairo" "$VERSION_CAIRO" "247" # latest version in release monitoring does not exist
 #version_latest "fribidi" "$VERSION_FRIBIDI" "857"
 #version_latest "pango" "$VERSION_PANGO" "11783" # latest version requires meson instead of autotools
-#version_latest "croco" "$VERSION_CROCO" "11787"
 #version_latest "svg" "$VERSION_SVG" "5420" latest version fails to link against latest cairo
 #version_latest "gif" "$VERSION_GIF" "1158" # v5.1.5+ provides a Makefile only so will require custom cross-compilation setup
 version_latest "poppler" "$VERSION_POPPLER" "3686"
@@ -107,14 +102,14 @@ if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 #esac
 
 #mkdir ${DEPS}/zlib
-#curl -Ls http://zlib.net/zlib-${VERSION_ZLIB}.tar.xz | tar xJC ${DEPS}/zlib --strip-components=1
+#curl -Ls https://zlib.net/zlib-${VERSION_ZLIB}.tar.xz | tar xJC ${DEPS}/zlib --strip-components=1
 #cd ${DEPS}/zlib
 #./configure --prefix=${TARGET} --uname=linux
 #make install
 #rm ${TARGET}/lib/libz.a
 
 #mkdir ${DEPS}/ffi
-#curl -Ls ftp://sourceware.org/pub/libffi/libffi-${VERSION_FFI}.tar.gz | tar xzC ${DEPS}/ffi --strip-components=1
+#curl -Ls https://sourceware.org/pub/libffi/libffi-${VERSION_FFI}.tar.gz | tar xzC ${DEPS}/ffi --strip-components=1
 #cd ${DEPS}/ffi
 #sed -i 's/@toolexeclibdir@/$(libdir)/g' Makefile.in
 #./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking --disable-builddir
@@ -145,14 +140,14 @@ if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 #make install-strip
 
 mkdir ${DEPS}/exif
-curl -Ls ${SOURCEFORGE_BASE_URL}libexif/libexif/${VERSION_EXIF}/libexif-${VERSION_EXIF}.tar.bz2 | tar xjC ${DEPS}/exif --strip-components=1
+curl -Ls https://sourceforge.mirrorservice.org/l/li/libexif/libexif/${VERSION_EXIF}/libexif-${VERSION_EXIF}.tar.bz2 | tar xjC ${DEPS}/exif --strip-components=1
 cd ${DEPS}/exif
 autoreconf -fiv
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
 
 mkdir ${DEPS}/lcms2
-curl -Ls ${SOURCEFORGE_BASE_URL}lcms/lcms/${VERSION_LCMS2}/lcms2-${VERSION_LCMS2}.tar.gz | tar xzC ${DEPS}/lcms2 --strip-components=1
+curl -Ls https://sourceforge.mirrorservice.org/l/lc/lcms/lcms/${VERSION_LCMS2}/lcms2-${VERSION_LCMS2}.tar.gz | tar xzC ${DEPS}/lcms2 --strip-components=1
 cd ${DEPS}/lcms2
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
@@ -165,27 +160,27 @@ cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=/root/Toolchain.cmake -DCMAKE_IN
 make install/strip
 
 mkdir ${DEPS}/png16
-curl -Ls ${SOURCEFORGE_BASE_URL}libpng/libpng16/${VERSION_PNG16}/libpng-${VERSION_PNG16}.tar.xz | tar xJC ${DEPS}/png16 --strip-components=1
+curl -Ls https://sourceforge.mirrorservice.org/l/li/libpng/libpng16/${VERSION_PNG16}/libpng-${VERSION_PNG16}.tar.xz | tar xJC ${DEPS}/png16 --strip-components=1
 cd ${DEPS}/png16
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
 
 mkdir ${DEPS}/webp
-curl -Ls http://downloads.webmproject.org/releases/webp/libwebp-${VERSION_WEBP}.tar.gz | tar xzC ${DEPS}/webp --strip-components=1
+curl -Ls https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${VERSION_WEBP}.tar.gz | tar xzC ${DEPS}/webp --strip-components=1
 cd ${DEPS}/webp
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
   --disable-neon --enable-libwebpmux
 make install-strip
 
 mkdir ${DEPS}/tiff
-curl -Ls http://download.osgeo.org/libtiff/tiff-${VERSION_TIFF}.tar.gz | tar xzC ${DEPS}/tiff --strip-components=1
+curl -Ls https://download.osgeo.org/libtiff/tiff-${VERSION_TIFF}.tar.gz | tar xzC ${DEPS}/tiff --strip-components=1
 cd ${DEPS}/tiff
 if [ -n "${CHOST}" ]; then autoreconf -fiv; fi
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking --disable-mdi --disable-pixarlog --disable-cxx
 make install-strip
 
 #mkdir ${DEPS}/orc
-#curl -Ls http://gstreamer.freedesktop.org/data/src/orc/orc-${VERSION_ORC}.tar.xz | tar xJC ${DEPS}/orc --strip-components=1
+#curl -Ls https://gstreamer.freedesktop.org/data/src/orc/orc-${VERSION_ORC}.tar.xz | tar xJC ${DEPS}/orc --strip-components=1
 #cd ${DEPS}/orc
 #./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 #make install-strip
@@ -260,12 +255,6 @@ make install-strip
 #  --without-gtk-doc
 #make install-strip
 
-#mkdir ${DEPS}/croco
-#curl -Lks https://download.gnome.org/sources/libcroco/$(without_patch $VERSION_CROCO)/libcroco-${VERSION_CROCO}.tar.xz | tar xJC ${DEPS}/croco --strip-components=1
-#cd ${DEPS}/croco
-#./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
-#make install-strip
-
 #mkdir ${DEPS}/svg
 #curl -Lks https://download.gnome.org/sources/librsvg/$(without_patch $VERSION_SVG)/librsvg-${VERSION_SVG}.tar.xz | tar xJC ${DEPS}/svg --strip-components=1
 #cd ${DEPS}/svg
@@ -278,7 +267,7 @@ make install-strip
 #execstack -c ${TARGET}/lib/librsvg-2.so || true
 
 mkdir ${DEPS}/gif
-curl -Ls ${SOURCEFORGE_BASE_URL}giflib/giflib-${VERSION_GIF}.tar.gz | tar xzC ${DEPS}/gif --strip-components=1
+curl -Ls https://sourceforge.mirrorservice.org/g/gi/giflib/giflib-${VERSION_GIF}.tar.gz | tar xzC ${DEPS}/gif --strip-components=1
 cd ${DEPS}/gif
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
@@ -415,25 +404,28 @@ printf "{\n\
 printf "\"${PLATFORM}\"" >platform.json
 
 # Pack only the relevant shared libraries
-mkdir ${TARGET}/x-lib
-cd ${TARGET}/lib
-cp -L libvips-cpp.so.42 ${TARGET}/x-lib
-while read dep; do
-  cp -L $dep ${TARGET}/x-lib/$dep
-  echo lib/$dep
-done < <(ldd libvips-cpp.so.42 | grep ${TARGET}/lib | cut -d '=' -f1 | awk '{print $1}')
-
-cd ${TARGET}
-rm -rf lib
-mv x-lib lib
+#mkdir ${TARGET}/x-lib
+#cd ${TARGET}/lib
+#cp -L libvips-cpp.so.42 ${TARGET}/x-lib
+#while read dep; do
+#  cp -L $dep ${TARGET}/x-lib/$dep
+#  echo lib/$dep
+#done < <(ldd libvips-cpp.so.42 | grep ${TARGET}/lib | cut -d '=' -f1 | awk '{print $1}')
+#
+#cd ${TARGET}
+#rm -rf lib
+#mv x-lib lib
 
 # Remove the old C++ bindings
 cd ${TARGET}/include
 rm -rf vips/vipsc++.h vips/vipscpp.h
-cd ${TARGET}/lib
-rm -rf .libs *.la libvipsCC*
 cd ${TARGET}/share
 rm -rf pkgconfig
+cd ${TARGET}/lib
+rm -rf pkgconfig .libs *.la libvipsCC* cmake
+
+# Set RPATH to $ORIGIN
+find ${TARGET}/lib -type f -name "*.so*" -exec sh -c "patchelf --set-rpath '\$ORIGIN' --force-rpath {}" \;
 
 # Create .tar.gz
 cd ${TARGET}
