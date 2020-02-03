@@ -45,7 +45,7 @@ VERSION_POPPLER=0.85.0
 #VERSION_POPPLER_DATA=0.4.9
 VERSION_HEIF=1.5.1
 VERSION_DE265=1.0.3
-VERSION_IMAGEMAGICK="6.9.10-90"
+VERSION_IMAGEMAGICK="6.9.10-91"
 
 # Remove patch version component
 without_patch() {
@@ -371,6 +371,7 @@ cd ${DEPS}/vips
   --with-poppler \
   --with-rsvg \
   --with-tiff \
+  --with-png-includes=${TARGET}/include --with-png-libraries=${TARGET}/lib \
   --with-giflib-includes=${TARGET}/include --with-giflib-libraries=${TARGET}/lib \
   --with-jpeg-includes=${TARGET}/include --with-jpeg-libraries=${TARGET}/lib
 make install-strip
@@ -392,13 +393,13 @@ printf "{\n\
   \"imagemagick\": \"${VERSION_IMAGEMAGICK}\",\n\
   \"openjpeg\": \"${VERSION_JP2}\",\n\
   \"orc\": \"$(pkg-config --modversion orc-0.4)\",\n\
-  \"png\": \"${VERSION_PNG}\",\n\
+  \"png\": \"${VERSION_PNG16}\",\n\
   \"pixman\": \"$(pkg-config --modversion pixman-1)\",\n\
   \"svg\": \"$(pkg-config --modversion librsvg-2.0)\",\n\
   \"tiff\": \"${VERSION_TIFF}\",\n\
   \"vips\": \"${VERSION_VIPS}\",\n\
   \"webp\": \"${VERSION_WEBP}\",\n\
-  \"xml\": \"$(pkg-config --modversion libxml-2.0)\",\n\
+  \"xml\": \"$(pkg-config --modversion libxml-2.0)\"\n\
 }" >versions.json
 
 printf "\"${PLATFORM}\"" >platform.json
