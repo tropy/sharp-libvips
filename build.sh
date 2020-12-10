@@ -63,15 +63,15 @@ fi
 
 # Update base images
 for baseimage in centos:7 debian:buster debian:bullseye alpine:3.11; do
-  docker pull $baseimage
+  sudo docker pull $baseimage
 done
 
 # Windows
 for flavour in win32-ia32 win32-x64 win32-arm64v8; do
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
-    docker build -t vips-dev-win32 win32
-    docker run --rm \
+    sudo docker build -t vips-dev-win32 win32
+    sudo docker run --rm \
       -e "VERSION_VIPS=${VERSION_VIPS}" \
       -e "PLATFORM=${flavour}" \
       -e "TYPE=${TYPE}" \
@@ -84,8 +84,8 @@ done
 for flavour in linux-x64 linuxmusl-x64 linux-armv6 linux-armv7 linux-arm64v8; do
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
-    docker build -t vips-dev-$flavour $flavour
-    docker run --rm \
+    sudo docker build -t vips-dev-$flavour $flavour
+    sudo docker run --rm \
       -e "VERSION_VIPS=${VERSION_VIPS}" \
       -e "TYPE=${TYPE}" \
       -v $PWD:/packaging \
