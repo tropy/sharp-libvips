@@ -41,8 +41,8 @@ if [ $PLATFORM = "darwin-x64" ] && [ "$(uname)" == "Darwin" ]; then
   export PLATFORM
   export TYPE
 
-  # 10.9 should be a good minimal release target
-  export MACOSX_DEPLOYMENT_TARGET="10.9"
+  # 10.13 is Tropy's minimum required version
+  export MACOSX_DEPLOYMENT_TARGET="10.13"
 
   # Added -fno-stack-check to workaround a stack misalignment bug on macOS 10.15
   # See:
