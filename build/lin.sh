@@ -105,6 +105,9 @@ VERSION_GIF=5.1.4
 VERSION_AOM=2.0.1
 VERSION_HEIF=1.10.0
 
+# Extra dependencies for Tropy
+VERSION_DE265=1.0.8
+
 # Remove patch version component
 without_patch() {
   echo "${1%.[[:digit:]]*}"
@@ -145,6 +148,7 @@ version_latest "pango" "$VERSION_PANGO" "11783"
 version_latest "svg" "$VERSION_SVG" "5420"
 #version_latest "gif" "$VERSION_GIF" "1158" # v5.1.5+ provides a Makefile only so will require custom cross-compilation setup
 #version_latest "aom" "$VERSION_AOM" "17628" # latest version in release monitoring does not exist
+version_latest "de265" "$VERSION_DE265" "11239"
 version_latest "heif" "$VERSION_HEIF" "64439"
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
@@ -228,11 +232,18 @@ AOM_AS_FLAGS="${FLAGS}" LDFLAGS=${LDFLAGS/\$/} cmake -G"Unix Makefiles" ${TYPE_F
   ..
 make install/strip
 
+mkdir ${DEPS}/de265
+$CURL https://github.com/strukturag/libde265/releases/download/v${VERSION_DE265}/libde265-${VERSION_DE265}.tar.gz | tar xzC ${DEPS}/de265 --strip-components=1
+cd ${DEPS}/de265
+./configure --host=${CHOST} --prefix=${TARGET} --enable-static --disable-shared --disable-dependency-tracking \
+  --disable-dec265 --disable-sherlock265
+make install-strip
+
 mkdir ${DEPS}/heif
 $CURL https://github.com/strukturag/libheif/releases/download/v${VERSION_HEIF}/libheif-${VERSION_HEIF}.tar.gz | tar xzC ${DEPS}/heif --strip-components=1
 cd ${DEPS}/heif
 ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --disable-gdk-pixbuf --disable-go --disable-examples --disable-libde265 --disable-x265
+  --disable-gdk-pixbuf --disable-go --disable-examples --disable-x265
 make install-strip
 
 mkdir ${DEPS}/jpeg
@@ -461,6 +472,7 @@ printf "{\n\
   \"cairo\": \"${VERSION_CAIRO}\",\n\
   \"exif\": \"${VERSION_EXIF}\",\n\
   \"expat\": \"${VERSION_EXPAT}\",\n\
+  \"de265\": \"${VERSION_DE265}\",\n\
   \"ffi\": \"${VERSION_FFI}\",\n\
   \"fontconfig\": \"${VERSION_FONTCONFIG}\",\n\
   \"freetype\": \"${VERSION_FREETYPE}\",\n\
