@@ -107,6 +107,8 @@ VERSION_HEIF=1.10.0
 
 # Extra dependencies for Tropy
 VERSION_DE265=1.0.8
+VERSION_OPENJPEG=2.4.0
+VERSION_POPPLER=21.01.0
 
 # Remove patch version component
 without_patch() {
@@ -150,6 +152,8 @@ version_latest "svg" "$VERSION_SVG" "5420"
 #version_latest "aom" "$VERSION_AOM" "17628" # latest version in release monitoring does not exist
 version_latest "de265" "$VERSION_DE265" "11239"
 version_latest "heif" "$VERSION_HEIF" "64439"
+version_latest "openjpeg" "$VERSION_OPENJPEG" "2550"
+version_latest "poppler" "$VERSION_POPPLER" "3686"
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
@@ -409,13 +413,34 @@ cd ${DEPS}/gif
 ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking
 make install-strip
 
+mkdir -p ${DEPS}/openjpeg/build
+$CURL https://github.com/uclouvain/openjpeg/archive/v${VERSION_OPENJPEG}.tar.gz | tar xzC ${DEPS}/openjpeg --strip-components=1
+cd ${DEPS}/openjpeg/build
+LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} \
+  -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_CODEC=OFF -DCMAKE_BUILD_TYPE=Release
+make install/strip
+
+mkdir -p ${DEPS}/poppler/build
+$CURL https://poppler.freedesktop.org/poppler-${VERSION_POPPLER}.tar.xz | tar xJC ${DEPS}/poppler --strip-components=1
+cd ${DEPS}/poppler/build
+# Skip building and linking pfd-fullrewrite
+sed -i "s/add_subdirectory(test)//" ../CMakeLists.txt
+# Add libopenjp2 to pkg-config linker flags
+sed -i "s/-lpoppler/-lpoppler -lopenjp2/" ../poppler.pc.cmake
+LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
+  -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=release \
+  -DENABLE_GLIB=ON -DENABLE_ZLIB=ON -DENABLE_ZLIB_UNCOMPRESS=ON -DENABLE_LIBOPENJPEG=openjpeg2 \
+  -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_QT5=OFF -DENABLE_QT6=OFF -DENABLE_CPP=OFF -DENABLE_LIBCURL=OFF -DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_TESTS=OFF -DENABLE_GTK_DOC=OFF \
+  -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF -DBUILD_CPP_TESTS=OFF -DEXTRA_WARN=OFF
+make install/strip
+
 mkdir ${DEPS}/vips
 $CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
 ${TYPE_STATIC:+PKG_CONFIG="pkg-config --static"} ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
   --disable-debug --disable-deprecated --disable-introspection --without-analyze --without-cfitsio --without-fftw \
   --without-imagequant --without-magick --without-matio --without-nifti --without-OpenEXR \
-  --without-openslide --without-pdfium --without-poppler --without-ppm --without-radiance \
+  --without-openslide --without-pdfium --without-ppm --without-radiance \
   ${LINUX:+LDFLAGS="$LDFLAGS -Wl,-Bsymbolic-functions"}
 # https://docs.fedoraproject.org/en-US/packaging-guidelines/#_removing_rpath
 sed -i'.bak' 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
@@ -487,8 +512,10 @@ printf "{\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"orc\": \"${VERSION_ORC}\",\n\
+  \"openjpeg\": \"${VERSION_OPENJPEG}\",\n\
   \"pango\": \"${VERSION_PANGO}\",\n\
   \"pixman\": \"${VERSION_PIXMAN}\",\n\
+  \"poppler\": \"${VERSION_POPPLER}\",\n\
   \"png\": \"${VERSION_PNG16}\",\n\
   \"svg\": \"${VERSION_SVG}\",\n\
   \"spng\": \"${VERSION_SPNG}\",\n\
