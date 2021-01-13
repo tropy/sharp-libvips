@@ -424,9 +424,9 @@ mkdir -p ${DEPS}/poppler/build
 $CURL https://poppler.freedesktop.org/poppler-${VERSION_POPPLER}.tar.xz | tar xJC ${DEPS}/poppler --strip-components=1
 cd ${DEPS}/poppler/build
 # Skip building and linking pfd-fullrewrite
-sed -i "s/add_subdirectory(test)//" ../CMakeLists.txt
+sed -i'.bak' "/subdirectory(test)/d" ../CMakeLists.txt
 # Add libopenjp2 to pkg-config linker flags
-sed -i "s/-lpoppler/-lpoppler -lopenjp2/" ../poppler.pc.cmake
+sed -i'.bak' "s/-lpoppler/& -lopenjp2/" ../poppler.pc.cmake
 LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
   -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=release \
   -DENABLE_GLIB=ON -DENABLE_ZLIB=ON -DENABLE_ZLIB_UNCOMPRESS=ON -DENABLE_LIBOPENJPEG=openjpeg2 \
