@@ -106,6 +106,7 @@ VERSION_AOM=2.0.1
 VERSION_HEIF=1.10.0
 
 # Extra dependencies for Tropy
+VERSION_MAGICK="6.9.11-57"
 VERSION_DE265=1.0.8
 VERSION_OPENJPEG=2.4.0
 VERSION_POPPLER=21.01.0
@@ -154,6 +155,7 @@ version_latest "de265" "$VERSION_DE265" "11239"
 version_latest "heif" "$VERSION_HEIF" "64439"
 version_latest "openjpeg" "$VERSION_OPENJPEG" "2550"
 version_latest "poppler" "$VERSION_POPPLER" "3686"
+version_latest "imagemagick" "$VERSION_MAGICK" "16253"
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
@@ -434,12 +436,22 @@ LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT
   -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF -DBUILD_CPP_TESTS=OFF -DEXTRA_WARN=OFF
 make install/strip
 
+mkdir ${DEPS}/imagemagick
+$CURL https://imagemagick.org/download/ImageMagick-${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
+cd ${DEPS}/imagemagick
+./configure --host=${CHOST} --prefix=${TARGET} --disable-shared --enable-static \
+  --disable-dependency-tracking --disable-openmp \
+  --with-modules --with-openjp2 --without-fontconfig --without-freetype --without-gvc \
+  --without-heic --without-lqr --without-lzma --without-magick-plus-plus --without-openexr \
+  --without-pango --without-rsvg --without-webp --without-x --without-xml
+make install-strip
+
 mkdir ${DEPS}/vips
 $CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
 ${TYPE_STATIC:+PKG_CONFIG="pkg-config --static"} ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
   --disable-debug --disable-deprecated --disable-introspection --without-analyze --without-cfitsio --without-fftw \
-  --without-imagequant --without-magick --without-matio --without-nifti --without-OpenEXR \
+  --without-imagequant --without-matio --without-nifti --without-OpenEXR \
   --without-openslide --without-pdfium --without-ppm --without-radiance \
   ${LINUX:+LDFLAGS="$LDFLAGS -Wl,-Bsymbolic-functions"}
 # https://docs.fedoraproject.org/en-US/packaging-guidelines/#_removing_rpath
@@ -509,6 +521,7 @@ printf "{\n\
   \"gsf\": \"${VERSION_GSF}\",\n\
   \"harfbuzz\": \"${VERSION_HARFBUZZ}\",\n\
   \"heif\": \"${VERSION_HEIF}\",\n\
+  \"imagemagick\": \"${VERSION_MAGICK}\",\n\
   \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"orc\": \"${VERSION_ORC}\",\n\
