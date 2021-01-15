@@ -3,7 +3,7 @@ set -e
 
 if [ $# -lt 1 ]; then
   echo
-  echo "Usage: $0 VERSION [PLATFORM]"
+  echo "Usage: $0 VERSION [PLATFORM] [TYPE]"
   echo "Build shared libraries for libvips and its dependencies via containers"
   echo
   echo "Please specify the libvips VERSION, e.g. 8.9.2"
@@ -21,10 +21,14 @@ if [ $# -lt 1 ]; then
   echo "- linux-arm64v8"
   echo "- darwin-x64"
   echo
+  echo "TYPE specifies if dependencies are linked as 'static' (default)"
+  echo "or 'shared' libraries."
+  echo
   exit 1
 fi
 VERSION_VIPS="$1"
 PLATFORM="${2:-all}"
+TYPE="${3:-static}"
 
 # macOS
 # Note: we intentionally don't build these binaries inside a Docker container
@@ -35,6 +39,7 @@ if [ $PLATFORM = "darwin-x64" ] && [ "$(uname)" == "Darwin" ]; then
 
   export VERSION_VIPS
   export PLATFORM
+  export TYPE
 
   # 10.9 should be a good minimal release target
   export MACOSX_DEPLOYMENT_TARGET="10.9"
@@ -66,7 +71,12 @@ for flavour in win32-ia32 win32-x64 win32-arm64v8; do
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
     docker build -t vips-dev-win32 win32
-    docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -e "PLATFORM=${flavour}" -v $PWD:/packaging vips-dev-win32 sh -c "/packaging/build/win.sh"
+    docker run --rm \
+      -e "VERSION_VIPS=${VERSION_VIPS}" \
+      -e "PLATFORM=${flavour}" \
+      -e "TYPE=${TYPE}" \
+      -v $PWD:/packaging \
+      vips-dev-win32 sh -c "/packaging/build/win.sh"
   fi
 done
 
@@ -75,7 +85,12 @@ for flavour in linux-x64 linuxmusl-x64 linux-armv6 linux-armv7 linux-arm64v8; do
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
     docker build -t vips-dev-$flavour $flavour
-    docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -v $PWD:/packaging vips-dev-$flavour sh -c "/packaging/build/lin.sh"
+    docker run --rm \
+      -e "VERSION_VIPS=${VERSION_VIPS}" \
+      -e "TYPE=${TYPE}" \
+      -v $PWD:/packaging \
+      vips-dev-$flavour \
+      sh -c "/packaging/build/lin.sh"
   fi
 done
 
