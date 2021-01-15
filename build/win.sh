@@ -22,10 +22,19 @@ case ${PLATFORM} in
     ;;
 esac
 
-FILENAME="vips-dev-${ARCH}-web-${VERSION_VIPS}-static.zip"
-URL="https://github.com/libvips/build-win64-mxe/releases/download/v${VERSION_VIPS}/${FILENAME}"
-echo "Downloading $URL"
-$CURL -O $URL
+if [ $TYPE = 'shared' ]; then
+  FILENAME="vips-dev-${ARCH}-tropy-${VERSION_VIPS}.zip"
+else
+  FILENAME="vips-dev-${ARCH}-tropy-${VERSION_VIPS}-static.zip"
+fi
+
+if [ -f /packaging/$FILENAME ]; then
+  cp /packaging/$FILENAME $FILENAME
+else
+  URL="https://github.com/tropy/build-win64-mxe/releases/download/v${VERSION_VIPS}/${FILENAME}"
+  echo "Downloading $URL"
+  $CURL -O $URL
+fi
 unzip $FILENAME
 
 # Clean and zip

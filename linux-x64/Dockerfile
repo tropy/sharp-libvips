@@ -29,6 +29,18 @@ RUN \
     ninja-build \
     prelink \
     python3 \
+    librsvg2-devel \
+    pango-devel \
+    cairo-devel \
+    expat-devel \
+    gdk-pixbuf2-devel \
+    harfbuzz-devel \
+    pixman-devel \
+    fribidi-devel \
+    freetype-devel \
+    fontconfig-devel \
+    zlib-devel \
+    libffi-devel \
     && \
   curl https://sh.rustup.rs -sSf | sh -s -- -y \
     --no-modify-path \
