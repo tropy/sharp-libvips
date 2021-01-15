@@ -3,7 +3,7 @@ set -e
 
 if [ $# -lt 1 ]; then
   echo
-  echo "Usage: $0 VERSION [PLATFORM]"
+  echo "Usage: $0 VERSION [PLATFORM] [TYPE]"
   echo "Build shared libraries for libvips and its dependencies via containers"
   echo
   echo "Please specify the libvips VERSION, e.g. 8.9.2"
@@ -23,26 +23,30 @@ if [ $# -lt 1 ]; then
   echo "- darwin-x64"
   echo "- darwin-arm64v8"
   echo
+  echo "TYPE specifies if dependencies are linked as 'static' (default)"
+  echo "or 'shared' libraries."
+  echo
   exit 1
 fi
 VERSION_VIPS="$1"
 PLATFORM="${2:-all}"
+TYPE="${3:-static}"
 
 # macOS
 # Note: we intentionally don't build these binaries inside a Docker container
 for flavour in darwin-x64 darwin-arm64v8; do
   if [ $PLATFORM = $flavour ] && [ "$(uname)" == "Darwin" ]; then
     echo "Building $flavour..."
-
     # Use Clang provided by XCode
     export CC="clang"
     export CXX="clang++"
 
     export VERSION_VIPS
     export PLATFORM
+    export TYPE
 
-    # 10.9 should be a good minimal release target
-    export MACOSX_DEPLOYMENT_TARGET="10.9"
+    # 10.13 is Tropy's minimum required version
+    export MACOSX_DEPLOYMENT_TARGET="10.13"
 
     # Added -fno-stack-check to workaround a stack misalignment bug on macOS 10.15
     # See:
@@ -51,14 +55,18 @@ for flavour in darwin-x64 darwin-arm64v8; do
     export FLAGS="-fno-stack-check"
 
     if [ $PLATFORM = "darwin-arm64v8" ]; then
-      # ARM64 builds work via cross compilation from an x86_64 machine
-      export CHOST="aarch64-apple-darwin"
-      export FLAGS+=" -arch arm64"
-      export MESON="--cross-file=$PWD/$PLATFORM/meson.ini"
-      # macOS 11 Big Sur is the first version to support ARM-based macs
+
+      if [ "$(uname -m)" != "arm64" ]; then
+        # Attempt ARM64 cross compilation from x86_64 machine
+        export CHOST="aarch64-apple-darwin"
+        export FLAGS+=" -arch arm64"
+        export MESON="--cross-file=${PWD}/${PLATFORM}/meson.ini"
+      fi
+
+      # macOS 11 is the version version to support ARM-based macs
       export MACOSX_DEPLOYMENT_TARGET="11.0"
-      # Set SDKROOT to the latest SDK available
-      export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
+      # Set SDKROOT to latest SDK available
+      export SDKROOT="$(xcrun -sdk macosx --show-sdk-path)"
     fi
 
     . $PWD/build/mac.sh
@@ -83,7 +91,12 @@ for flavour in win32-ia32 win32-x64 win32-arm64v8; do
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
     docker build -t vips-dev-win32 win32
-    docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -e "PLATFORM=${flavour}" -v $PWD:/packaging vips-dev-win32 sh -c "/packaging/build/win.sh"
+    docker run --rm \
+      -e "VERSION_VIPS=${VERSION_VIPS}" \
+      -e "PLATFORM=${flavour}" \
+      -e "TYPE=${TYPE}" \
+      -v $PWD:/packaging \
+      vips-dev-win32 sh -c "/packaging/build/win.sh"
   fi
 done
 
@@ -92,6 +105,6 @@ for flavour in linux-x64 linuxmusl-x64 linux-armv6 linux-armv7 linux-arm64v8 lin
   if [ $PLATFORM = "all" ] || [ $PLATFORM = $flavour ]; then
     echo "Building $flavour..."
     docker build -t vips-dev-$flavour $flavour
-    docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -e VERSION_LATEST_REQUIRED -v $PWD:/packaging vips-dev-$flavour sh -c "/packaging/build/lin.sh"
+    docker run --rm -e "VERSION_VIPS=${VERSION_VIPS}" -e "TYPE=${TYPE}" -e VERSION_LATEST_REQUIRED -v $PWD:/packaging vips-dev-$flavour sh -c "/packaging/build/lin.sh"
   fi
 done
