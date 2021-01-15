@@ -241,7 +241,7 @@ make install/strip
 mkdir ${DEPS}/de265
 $CURL https://github.com/strukturag/libde265/releases/download/v${VERSION_DE265}/libde265-${VERSION_DE265}.tar.gz | tar xzC ${DEPS}/de265 --strip-components=1
 cd ${DEPS}/de265
-./configure --host=${CHOST} --prefix=${TARGET} --enable-static --disable-shared --disable-dependency-tracking \
+./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
   --disable-dec265 --disable-sherlock265
 make install-strip
 
@@ -419,7 +419,7 @@ mkdir -p ${DEPS}/openjpeg/build
 $CURL https://github.com/uclouvain/openjpeg/archive/v${VERSION_OPENJPEG}.tar.gz | tar xzC ${DEPS}/openjpeg --strip-components=1
 cd ${DEPS}/openjpeg/build
 LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} \
-  -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_CODEC=OFF -DCMAKE_BUILD_TYPE=Release
+  ${TYPE_FLAGS_CMAKE} -DBUILD_CODEC=OFF -DCMAKE_BUILD_TYPE=Release
 make install/strip
 
 mkdir -p ${DEPS}/poppler/build
@@ -430,7 +430,7 @@ sed -i'.bak' "/subdirectory(test)/d" ../CMakeLists.txt
 # Add libopenjp2 to pkg-config linker flags
 sed -i'.bak' "s/-lpoppler/& -lopenjp2/" ../poppler.pc.cmake
 LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
-  -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=release \
+  ${TYPE_FLAGS_CMAKE} -DCMAKE_BUILD_TYPE=release \
   -DENABLE_GLIB=ON -DENABLE_ZLIB=ON -DENABLE_ZLIB_UNCOMPRESS=ON -DENABLE_LIBOPENJPEG=openjpeg2 \
   -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF -DENABLE_QT5=OFF -DENABLE_QT6=OFF -DENABLE_CPP=OFF -DENABLE_LIBCURL=OFF -DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_TESTS=OFF -DENABLE_GTK_DOC=OFF \
   -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF -DBUILD_CPP_TESTS=OFF -DEXTRA_WARN=OFF
@@ -439,7 +439,7 @@ make install/strip
 mkdir ${DEPS}/imagemagick
 $CURL https://imagemagick.org/download/ImageMagick-${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
 cd ${DEPS}/imagemagick
-./configure --host=${CHOST} --prefix=${TARGET} --disable-shared --enable-static \
+./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} \
   --disable-dependency-tracking --disable-openmp \
   --with-modules --with-openjp2 --without-fontconfig --without-freetype --without-gvc \
   --without-heic --without-lqr --without-lzma --without-magick-plus-plus --without-openexr \
