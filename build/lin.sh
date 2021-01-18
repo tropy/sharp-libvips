@@ -231,7 +231,7 @@ $CURL https://aomedia.googlesource.com/aom/+archive/v${VERSION_AOM}.tar.gz | tar
 cd ${DEPS}/aom
 mkdir aom_build
 cd aom_build
-AOM_AS_FLAGS="${FLAGS}" LDFLAGS=${LDFLAGS/\$/} cmake -G"Unix Makefiles" ${TYPE_FLAGS_CMAKE} \
+AOM_AS_FLAGS="${FLAGS}" LDFLAGS=${LDFLAGS/\$/} cmake -G"Unix Makefiles" ${TYPE_STATIC:--DENABLE_SHARED_LIBS=1} \
   -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=lib \
   -DENABLE_DOCS=0 -DENABLE_TESTS=0 -DENABLE_TESTDATA=0 -DENABLE_TOOLS=0 -DENABLE_EXAMPLES=0 \
   -DCONFIG_PIC=1 -DENABLE_NASM=1 ${WITHOUT_NEON:+-DENABLE_NEON=0} \
