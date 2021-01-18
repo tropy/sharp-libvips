@@ -438,7 +438,7 @@ LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT
 make install/strip
 
 mkdir ${DEPS}/imagemagick
-$CURL https://imagemagick.org/download/ImageMagick-${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
+$CURL https://download.imagemagick.org/ImageMagick/download/releases/ImageMagick-${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
 cd ${DEPS}/imagemagick
 ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} \
   --disable-dependency-tracking --disable-openmp \
