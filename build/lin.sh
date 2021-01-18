@@ -25,7 +25,6 @@ mkdir ${DEPS}
 mkdir ${TARGET}
 
 # Common build paths and flags
-export PKG_CONFIG_LIBDIR="${TARGET}/lib/pkgconfig"
 export PATH="${PATH}:${TARGET}/bin"
 export CPATH="${TARGET}/include"
 export LIBRARY_PATH="${TARGET}/lib"
@@ -37,11 +36,21 @@ export LDFLAGS="-L${TARGET}/lib"
 if [ $TYPE = "shared" ]; then
   TYPE_FLAGS="--enable-shared --disable-static"
   TYPE_FLAGS_CMAKE="-DBUILD_SHARED_LIBS=TRUE -DBUILD_STATIC_LIBS=FALSE"
+
+  export PKG_CONFIG_PATH="${TARGET}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+
+  # Instead of using a deps group parameter: only Electron requires
+  # the shared library build with old system libraries for now!
+  ELECTRON=true
 else
   TYPE="static"
   TYPE_STATIC=true
   TYPE_FLAGS="--disable-shared --enable-static"
   TYPE_FLAGS_CMAKE="-DBUILD_SHARED_LIBS=FALSE -DBUILD_STATIC_LIBS=TRUE"
+
+  # We don't want to use any native libraries, so unset PKG_CONFIG_PATH
+  export PKG_CONFIG_LIBDIR="${TARGET}/lib/pkgconfig"
+  unset PKG_CONFIG_PATH
 fi
 
 # On Linux, we need to create a relocatable library
@@ -69,9 +78,6 @@ export CARGO_PROFILE_RELEASE_INCREMENTAL=false
 export CARGO_PROFILE_RELEASE_LTO=true
 export CARGO_PROFILE_RELEASE_OPT_LEVEL=s
 export CARGO_PROFILE_RELEASE_PANIC=abort
-
-# We don't want to use any native libraries, so unset PKG_CONFIG_PATH
-unset PKG_CONFIG_PATH
 
 # Common options for curl
 CURL="curl --silent --location --retry 3 --retry-max-time 30"
@@ -169,39 +175,42 @@ if [ "${PLATFORM%-*}" == "linuxmusl" ] || [ "$DARWIN" = true ]; then
   make install-strip
 fi
 
-mkdir ${DEPS}/zlib
-$CURL https://zlib.net/zlib-${VERSION_ZLIB}.tar.xz | tar xJC ${DEPS}/zlib --strip-components=1
-cd ${DEPS}/zlib
-./configure --prefix=${TARGET} ${LINUX:+--uname=linux} ${DARWIN:+--uname=darwin} --${TYPE}
-make install
+if [ ! "$ELECTRON" = true ]; then
+  mkdir ${DEPS}/zlib
+  $CURL https://zlib.net/zlib-${VERSION_ZLIB}.tar.xz | tar xJC ${DEPS}/zlib --strip-components=1
+  cd ${DEPS}/zlib
+  ./configure --prefix=${TARGET} ${LINUX:+--uname=linux} ${DARWIN:+--uname=darwin} --${TYPE}
+  make install
+  INCLUDE_ZLIB=true
 
-mkdir ${DEPS}/ffi
-$CURL https://github.com/libffi/libffi/releases/download/v${VERSION_FFI}/libffi-${VERSION_FFI}.tar.gz | tar xzC ${DEPS}/ffi --strip-components=1
-cd ${DEPS}/ffi
-./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --disable-builddir --disable-multi-os-directory --disable-raw-api --disable-structs
-make install-strip
+  mkdir ${DEPS}/ffi
+  $CURL https://github.com/libffi/libffi/releases/download/v${VERSION_FFI}/libffi-${VERSION_FFI}.tar.gz | tar xzC ${DEPS}/ffi --strip-components=1
+  cd ${DEPS}/ffi
+  ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
+    --disable-builddir --disable-multi-os-directory --disable-raw-api --disable-structs
+  make install-strip
 
-mkdir ${DEPS}/glib
-$CURL https://download.gnome.org/sources/glib/$(without_patch $VERSION_GLIB)/glib-${VERSION_GLIB}.tar.xz | tar xJC ${DEPS}/glib --strip-components=1
-cd ${DEPS}/glib
-# Disable tests
-sed -i'.bak' "/build_tests =/ s/= .*/= false/" meson.build
-if [ "${PLATFORM%-*}" == "linuxmusl" ]; then
-  #$CURL https://git.alpinelinux.org/aports/plain/main/glib/musl-libintl.patch | patch -p1 # not compatible with glib 2.65.0
-  $CURL https://gist.github.com/kleisauke/f4bda6fc3030cf7b8a4fdb88e2ce8e13/raw/246ac97dfba72ad7607c69eed1810b2354cd2e86/musl-libintl.patch | patch -p1
+  mkdir ${DEPS}/glib
+  $CURL https://download.gnome.org/sources/glib/$(without_patch $VERSION_GLIB)/glib-${VERSION_GLIB}.tar.xz | tar xJC ${DEPS}/glib --strip-components=1
+  cd ${DEPS}/glib
+  # Disable tests
+  sed -i'.bak' "/build_tests =/ s/= .*/= false/" meson.build
+  if [ "${PLATFORM%-*}" == "linuxmusl" ]; then
+    #$CURL https://git.alpinelinux.org/aports/plain/main/glib/musl-libintl.patch | patch -p1 # not compatible with glib 2.65.0
+    $CURL https://gist.github.com/kleisauke/f4bda6fc3030cf7b8a4fdb88e2ce8e13/raw/246ac97dfba72ad7607c69eed1810b2354cd2e86/musl-libintl.patch | patch -p1
+  fi
+  LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+    -Dinternal_pcre=true -Dinstalled_tests=false -Dlibmount=disabled -Dlibelf=disabled ${DARWIN:+-Dbsymbolic_functions=false}
+  ninja -C _build
+  ninja -C _build install
 fi
-LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
-  -Dinternal_pcre=true -Dinstalled_tests=false -Dlibmount=disabled -Dlibelf=disabled ${DARWIN:+-Dbsymbolic_functions=false}
-ninja -C _build
-ninja -C _build install
 
 mkdir ${DEPS}/xml2
 $CURL http://xmlsoft.org/sources/libxml2-${VERSION_XML2}.tar.gz | tar xzC ${DEPS}/xml2 --strip-components=1
 cd ${DEPS}/xml2
 ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
   --without-python --without-debug --without-docbook --without-ftp --without-html --without-legacy \
-  --without-push --without-schematron --without-lzma --with-zlib=${TARGET}
+  --without-push --without-schematron --without-lzma ${INCLUDE_ZLIB:+--with-zlib=${TARGET}}
 make install-strip
 
 mkdir ${DEPS}/gsf
@@ -210,7 +219,7 @@ cd ${DEPS}/gsf
 # Skip unused subdirs
 sed -i'.bak' "s/ doc tools tests thumbnailer python//" Makefile.in
 ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --without-bz2 --without-gdk-pixbuf --with-zlib=${TARGET}
+  --without-bz2 --without-gdk-pixbuf ${INCLUDE_ZLIB:+--with-zlib=${TARGET}}
 make install-strip
 
 mkdir ${DEPS}/exif
@@ -297,117 +306,120 @@ LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=
 ninja -C _build
 ninja -C _build install
 
-mkdir ${DEPS}/gdkpixbuf
-$CURL https://download.gnome.org/sources/gdk-pixbuf/$(without_patch $VERSION_GDKPIXBUF)/gdk-pixbuf-${VERSION_GDKPIXBUF}.tar.xz | tar xJC ${DEPS}/gdkpixbuf --strip-components=1
-cd ${DEPS}/gdkpixbuf
-# Disable tests and thumbnailer
-sed -i'.bak' "/subdir('tests')/{N;d;}" meson.build
-# Disable the built-in loaders for BMP, GIF, ICO, PNM, XPM, XBM, TGA, ICNS and QTIF
-sed -i'.bak' "/\[ 'bmp'/{N;N;N;d;}" gdk-pixbuf/meson.build
-sed -i'.bak' "/\[ 'pnm'/d" gdk-pixbuf/meson.build
-sed -i'.bak' "/\[ 'xpm'/{N;N;N;N;d;}" gdk-pixbuf/meson.build
-# Skip executables
-sed -i'.bak' "/gdk-pixbuf-csource/{N;N;d;}" gdk-pixbuf/meson.build
-sed -i'.bak' "/loaders_cache = custom/{N;N;N;N;N;N;N;N;N;c\\
-  loaders_cache = []\\
-  loaders_dep = declare_dependency()
-}" gdk-pixbuf/meson.build
-sed -i'.bak' "/gdk-pixbuf-query-loaders/d" build-aux/post-install.sh
-# Ensure meson can find libjpeg when cross-compiling
-sed -i'.bak' "s/has_header('jpeglib.h')/has_header('jpeglib.h', args: '-I\/target\/include')/g" meson.build
-sed -i'.bak' "s/cc.find_library('jpeg'/dependency('libjpeg'/g" meson.build
-LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
-  -Dtiff=false -Dintrospection=disabled -Dinstalled_tests=false -Dgio_sniffing=false -Dman=false -Dbuiltin_loaders=png,jpeg
-ninja -C _build
-ninja -C _build install
-# Include libjpeg and libpng as a dependency of gdk-pixbuf, see: https://gitlab.gnome.org/GNOME/gdk-pixbuf/merge_requests/50
-sed -i'.bak' "s/^\(Requires:.*\)/\1 libjpeg, libpng16/" ${TARGET}/lib/pkgconfig/gdk-pixbuf-2.0.pc
 
-mkdir ${DEPS}/freetype
-$CURL https://download.savannah.gnu.org/releases/freetype/freetype-${VERSION_FREETYPE}.tar.xz | tar xJC ${DEPS}/freetype --strip-components=1
-cd ${DEPS}/freetype
-./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --without-bzip2 --without-png
-make install
+if [ ! "$ELECTRON" = true ]; then
+  mkdir ${DEPS}/gdkpixbuf
+  $CURL https://download.gnome.org/sources/gdk-pixbuf/$(without_patch $VERSION_GDKPIXBUF)/gdk-pixbuf-${VERSION_GDKPIXBUF}.tar.xz | tar xJC ${DEPS}/gdkpixbuf --strip-components=1
+  cd ${DEPS}/gdkpixbuf
+  # Disable tests and thumbnailer
+  sed -i'.bak' "/subdir('tests')/{N;d;}" meson.build
+  # Disable the built-in loaders for BMP, GIF, ICO, PNM, XPM, XBM, TGA, ICNS and QTIF
+  sed -i'.bak' "/\[ 'bmp'/{N;N;N;d;}" gdk-pixbuf/meson.build
+  sed -i'.bak' "/\[ 'pnm'/d" gdk-pixbuf/meson.build
+  sed -i'.bak' "/\[ 'xpm'/{N;N;N;N;d;}" gdk-pixbuf/meson.build
+  # Skip executables
+  sed -i'.bak' "/gdk-pixbuf-csource/{N;N;d;}" gdk-pixbuf/meson.build
+  sed -i'.bak' "/loaders_cache = custom/{N;N;N;N;N;N;N;N;N;c\\
+    loaders_cache = []\\
+    loaders_dep = declare_dependency()
+  }" gdk-pixbuf/meson.build
+  sed -i'.bak' "/gdk-pixbuf-query-loaders/d" build-aux/post-install.sh
+  # Ensure meson can find libjpeg when cross-compiling
+  sed -i'.bak' "s/has_header('jpeglib.h')/has_header('jpeglib.h', args: '-I\/target\/include')/g" meson.build
+  sed -i'.bak' "s/cc.find_library('jpeg'/dependency('libjpeg'/g" meson.build
+  LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+    -Dtiff=false -Dintrospection=disabled -Dinstalled_tests=false -Dgio_sniffing=false -Dman=false -Dbuiltin_loaders=png,jpeg
+  ninja -C _build
+  ninja -C _build install
+  # Include libjpeg and libpng as a dependency of gdk-pixbuf, see: https://gitlab.gnome.org/GNOME/gdk-pixbuf/merge_requests/50
+  sed -i'.bak' "s/^\(Requires:.*\)/\1 libjpeg, libpng16/" ${TARGET}/lib/pkgconfig/gdk-pixbuf-2.0.pc
 
-mkdir ${DEPS}/expat
-$CURL https://github.com/libexpat/libexpat/releases/download/R_${VERSION_EXPAT//./_}/expat-${VERSION_EXPAT}.tar.xz | tar xJC ${DEPS}/expat --strip-components=1
-cd ${DEPS}/expat
-./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} \
-  --disable-dependency-tracking --without-xmlwf --without-docbook --without-getrandom --without-sys-getrandom
-make install
+  mkdir ${DEPS}/freetype
+  $CURL https://download.savannah.gnu.org/releases/freetype/freetype-${VERSION_FREETYPE}.tar.xz | tar xJC ${DEPS}/freetype --strip-components=1
+  cd ${DEPS}/freetype
+  ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
+    --without-bzip2 --without-png
+  make install
 
-mkdir ${DEPS}/fontconfig
-$CURL https://www.freedesktop.org/software/fontconfig/release/fontconfig-${VERSION_FONTCONFIG}.tar.xz | tar xJC ${DEPS}/fontconfig --strip-components=1
-cd ${DEPS}/fontconfig
-./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --with-expat-includes=${TARGET}/include --with-expat-lib=${TARGET}/lib ${LINUX:+--sysconfdir=/etc} \
-  ${DARWIN:+--sysconfdir=/usr/local/etc} --disable-docs
-make install-strip
+  mkdir ${DEPS}/expat
+  $CURL https://github.com/libexpat/libexpat/releases/download/R_${VERSION_EXPAT//./_}/expat-${VERSION_EXPAT}.tar.xz | tar xJC ${DEPS}/expat --strip-components=1
+  cd ${DEPS}/expat
+  ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} \
+    --disable-dependency-tracking --without-xmlwf --without-docbook --without-getrandom --without-sys-getrandom
+  make install
 
-mkdir ${DEPS}/harfbuzz
-$CURL https://github.com/harfbuzz/harfbuzz/archive/${VERSION_HARFBUZZ}.tar.gz | tar xzC ${DEPS}/harfbuzz --strip-components=1
-cd ${DEPS}/harfbuzz
-# Disable utils
-sed -i'.bak' "/subdir('util')/d" meson.build
-LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
-  -Dicu=disabled -Dtests=disabled -Dintrospection=disabled -Ddocs=disabled -Dbenchmark=disabled ${DARWIN:+-Dcoretext=enabled}
-ninja -C _build
-ninja -C _build install
+  mkdir ${DEPS}/fontconfig
+  $CURL https://www.freedesktop.org/software/fontconfig/release/fontconfig-${VERSION_FONTCONFIG}.tar.xz | tar xJC ${DEPS}/fontconfig --strip-components=1
+  cd ${DEPS}/fontconfig
+  ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
+    --with-expat-includes=${TARGET}/include --with-expat-lib=${TARGET}/lib ${LINUX:+--sysconfdir=/etc} \
+    ${DARWIN:+--sysconfdir=/usr/local/etc} --disable-docs
+  make install-strip
 
-mkdir ${DEPS}/pixman
-$CURL https://cairographics.org/releases/pixman-${VERSION_PIXMAN}.tar.gz | tar xzC ${DEPS}/pixman --strip-components=1
-cd ${DEPS}/pixman
-# Disable tests and demos
-sed -i'.bak' "/subdir('test')/{N;d;}" meson.build
-LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
-  -Dlibpng=disabled -Diwmmxt=disabled -Dgtk=disabled -Dopenmp=disabled
-ninja -C _build
-ninja -C _build install
+  mkdir ${DEPS}/harfbuzz
+  $CURL https://github.com/harfbuzz/harfbuzz/archive/${VERSION_HARFBUZZ}.tar.gz | tar xzC ${DEPS}/harfbuzz --strip-components=1
+  cd ${DEPS}/harfbuzz
+  # Disable utils
+  sed -i'.bak' "/subdir('util')/d" meson.build
+  LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+    -Dicu=disabled -Dtests=disabled -Dintrospection=disabled -Ddocs=disabled -Dbenchmark=disabled ${DARWIN:+-Dcoretext=enabled}
+  ninja -C _build
+  ninja -C _build install
 
-mkdir ${DEPS}/cairo
-$CURL https://cairographics.org/snapshots/cairo-${VERSION_CAIRO}.tar.xz | tar xJC ${DEPS}/cairo --strip-components=1
-cd ${DEPS}/cairo
-sed -i'.bak' "s/^\(Libs:.*\)/\1 @CAIRO_NONPKGCONFIG_LIBS@/" src/cairo.pc.in
-./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --disable-xlib --disable-xcb --disable-win32 --disable-egl --disable-glx --disable-wgl --disable-ps \
-  --disable-trace --disable-interpreter ${LINUX:+--disable-quartz} ${DARWIN:+--enable-quartz-image} \
-  LIBS="-lpixman-1 -lfreetype"
-make install-strip
+  mkdir ${DEPS}/pixman
+  $CURL https://cairographics.org/releases/pixman-${VERSION_PIXMAN}.tar.gz | tar xzC ${DEPS}/pixman --strip-components=1
+  cd ${DEPS}/pixman
+  # Disable tests and demos
+  sed -i'.bak' "/subdir('test')/{N;d;}" meson.build
+  LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+    -Dlibpng=disabled -Diwmmxt=disabled -Dgtk=disabled -Dopenmp=disabled
+  ninja -C _build
+  ninja -C _build install
 
-mkdir ${DEPS}/fribidi
-$CURL https://github.com/fribidi/fribidi/releases/download/v${VERSION_FRIBIDI}/fribidi-${VERSION_FRIBIDI}.tar.xz | tar xJC ${DEPS}/fribidi --strip-components=1
-cd ${DEPS}/fribidi
-# Disable tests
-sed -i'.bak' "/subdir('test')/d" meson.build
-LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
-  -Ddocs=false
-ninja -C _build
-ninja -C _build install
+  mkdir ${DEPS}/cairo
+  $CURL https://cairographics.org/snapshots/cairo-${VERSION_CAIRO}.tar.xz | tar xJC ${DEPS}/cairo --strip-components=1
+  cd ${DEPS}/cairo
+  sed -i'.bak' "s/^\(Libs:.*\)/\1 @CAIRO_NONPKGCONFIG_LIBS@/" src/cairo.pc.in
+  ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
+    --disable-xlib --disable-xcb --disable-win32 --disable-egl --disable-glx --disable-wgl --disable-ps \
+    --disable-trace --disable-interpreter ${LINUX:+--disable-quartz} ${DARWIN:+--enable-quartz-image} \
+    LIBS="-lpixman-1 -lfreetype"
+  make install-strip
 
-mkdir ${DEPS}/pango
-$CURL https://download.gnome.org/sources/pango/$(without_patch $VERSION_PANGO)/pango-${VERSION_PANGO}.tar.xz | tar xJC ${DEPS}/pango --strip-components=1
-cd ${DEPS}/pango
-# Disable utils, examples, tests and tools
-sed -i'.bak' "/subdir('utils')/{N;N;N;d;}" meson.build
-LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
-  -Dgtk_doc=false -Dintrospection=disabled -Dfontconfig=enabled
-ninja -C _build
-ninja -C _build install
+  mkdir ${DEPS}/fribidi
+  $CURL https://github.com/fribidi/fribidi/releases/download/v${VERSION_FRIBIDI}/fribidi-${VERSION_FRIBIDI}.tar.xz | tar xJC ${DEPS}/fribidi --strip-components=1
+  cd ${DEPS}/fribidi
+  # Disable tests
+  sed -i'.bak' "/subdir('test')/d" meson.build
+  LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+    -Ddocs=false
+  ninja -C _build
+  ninja -C _build install
 
-mkdir ${DEPS}/svg
-$CURL https://download.gnome.org/sources/librsvg/$(without_patch $VERSION_SVG)/librsvg-${VERSION_SVG}.tar.xz | tar xJC ${DEPS}/svg --strip-components=1
-cd ${DEPS}/svg
-sed -i'.bak' "s/^\(Requires:.*\)/\1 cairo-gobject pangocairo/" librsvg.pc.in
-# Do not include debugging symbols
-sed -i'.bak' "/debug =/ s/= .*/= false/" Cargo.toml
-# LTO optimization does not work for staticlib+rlib compilation
-sed -i'.bak' "s/, \"rlib\"//" librsvg/Cargo.toml
-# Skip executables
-sed -i'.bak' "/PROGRAMS = /d" Makefile.in
-./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-  --disable-introspection --disable-tools --disable-pixbuf-loader ${DARWIN:+--disable-Bsymbolic}
-make install-strip
+  mkdir ${DEPS}/pango
+  $CURL https://download.gnome.org/sources/pango/$(without_patch $VERSION_PANGO)/pango-${VERSION_PANGO}.tar.xz | tar xJC ${DEPS}/pango --strip-components=1
+  cd ${DEPS}/pango
+  # Disable utils, examples, tests and tools
+  sed -i'.bak' "/subdir('utils')/{N;N;N;d;}" meson.build
+  LDFLAGS=${LDFLAGS/\$/} meson setup _build --default-library=${TYPE} --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+    -Dgtk_doc=false -Dintrospection=disabled -Dfontconfig=enabled
+  ninja -C _build
+  ninja -C _build install
+
+  mkdir ${DEPS}/svg
+  $CURL https://download.gnome.org/sources/librsvg/$(without_patch $VERSION_SVG)/librsvg-${VERSION_SVG}.tar.xz | tar xJC ${DEPS}/svg --strip-components=1
+  cd ${DEPS}/svg
+  sed -i'.bak' "s/^\(Requires:.*\)/\1 cairo-gobject pangocairo/" librsvg.pc.in
+  # Do not include debugging symbols
+  sed -i'.bak' "/debug =/ s/= .*/= false/" Cargo.toml
+  # LTO optimization does not work for staticlib+rlib compilation
+  sed -i'.bak' "s/, \"rlib\"//" librsvg/Cargo.toml
+  # Skip executables
+  sed -i'.bak' "/PROGRAMS = /d" Makefile.in
+  ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
+    --disable-introspection --disable-tools --disable-pixbuf-loader ${DARWIN:+--disable-Bsymbolic}
+  make install-strip
+fi
 
 mkdir ${DEPS}/gif
 $CURL https://downloads.sourceforge.net/project/giflib/giflib-${VERSION_GIF}.tar.gz | tar xzC ${DEPS}/gif --strip-components=1
@@ -555,6 +567,7 @@ $CURL -O https://raw.githubusercontent.com/tropy/sharp-libvips/master/THIRD-PART
 # Create the tarball
 rm -rf lib
 mv lib-filtered lib
+rm -f ${PACKAGE}/libvips-${VERSION_VIPS}-${PLATFORM}.tar.{gz,br}
 tar chzf ${PACKAGE}/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz \
   include \
   lib \
