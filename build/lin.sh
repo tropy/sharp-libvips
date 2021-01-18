@@ -463,7 +463,14 @@ make install-strip
 rm -rf ${TARGET}/lib/{pkgconfig,.libs,*.la,cmake}
 
 mkdir ${TARGET}/lib-filtered
-mv ${TARGET}/lib/glib-2.0 ${TARGET}/lib-filtered
+
+if [ -d ${TARGET}/lib/glib-2.0 ]; then
+  mv ${TARGET}/lib/glib-2.0 ${TARGET}/lib-filtered
+else
+  # Pack system glib includes if we didn't build it!
+  cp -r /usr/lib64/glib-2.0 ${TARGET}/lib-filtered
+  cp -r /usr/include/glib-2.0 ${TARGET}/include/
+fi
 
 # Pack only the relevant libraries
 # Note: we can't use ldd on Linux, since that can only be executed on the target machine
