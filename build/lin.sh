@@ -196,13 +196,6 @@ if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
 
-if [ "$DARWIN" = true ]; then
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path -y
-  if [ "$DARWIN_ARM" = true ]; then
-    ${CARGO_HOME}/bin/rustup target add aarch64-apple-darwin
-  fi
-fi
-
 if [ "${PLATFORM%-*}" == "linuxmusl" ] || [ "$DARWIN" = true ]; then
   mkdir ${DEPS}/gettext
   $CURL https://ftp.gnu.org/pub/gnu/gettext/gettext-${VERSION_GETTEXT}.tar.xz | tar xJC ${DEPS}/gettext --strip-components=1
@@ -304,12 +297,12 @@ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" ./configure \
 make install-strip
 
 mkdir ${DEPS}/jpeg
-#$CURL https://github.com/mozilla/mozjpeg/archive/v${VERSION_MOZJPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
-$CURL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${VERSION_JPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
+$CURL https://github.com/mozilla/mozjpeg/archive/v${VERSION_MOZJPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
+#$CURL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${VERSION_JPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
 cd ${DEPS}/jpeg
 CFLAGS="${CFLAGS} -O3" LDFLAGS=${LDFLAGS/\$/} cmake -G"Unix Makefiles" \
   -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
-  ${TYPE_FLAGS_CMAKE} -DWITH_JPEG8=1 -DWITH_TURBOJPEG=FALSE -DPNG_SUPPORTED=FALSE
+  ${TYPE_SHARED:+-DENABLE_STATIC=0} ${TYPE_STATIC:+-DENABLE_SHARED=0} -DWITH_JPEG8=1 -DWITH_TURBOJPEG=FALSE -DPNG_SUPPORTED=FALSE
 make install/strip
 
 mkdir ${DEPS}/png16
@@ -461,14 +454,12 @@ if [ ! "$ELECTRON" = true ]; then
   $CURL https://download.gnome.org/sources/librsvg/$(without_patch $VERSION_SVG)/librsvg-${VERSION_SVG}.tar.xz | tar xJC ${DEPS}/svg --strip-components=1
   cd ${DEPS}/svg
   sed -i'.bak' "s/^\(Requires:.*\)/\1 cairo-gobject pangocairo/" librsvg.pc.in
-  # Do not include debugging symbols
-  sed -i'.bak' "/debug =/ s/= .*/= false/" Cargo.toml
   # LTO optimization does not work for staticlib+rlib compilation
-  sed -i'.bak' "s/, \"rlib\"//" librsvg/Cargo.toml
+  sed -i'.bak' "s/, \"rlib\"//" Cargo.toml
   # Skip executables
-  sed -i'.bak' "/PROGRAMS = /d" Makefile.in
+  sed -i'.bak' "/SCRIPTS = /d" Makefile.in
   ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} --disable-dependency-tracking \
-    --disable-introspection --disable-tools --disable-pixbuf-loader ${DARWIN:+--disable-Bsymbolic}
+    --disable-introspection --disable-pixbuf-loader ${DARWIN:+--disable-Bsymbolic}
   make install-strip
 fi
 
@@ -528,8 +519,7 @@ PKG_CONFIG="pkg-config${TYPE_STATIC:+ --static}" CFLAGS="${CFLAGS} -O3" CXXFLAGS
   --disable-debug --disable-deprecated --disable-introspection --without-analyze --without-cfitsio --without-fftw \
   --without-matio --without-nifti --without-OpenEXR --without-openslide \
   --without-pdfium --without-ppm --without-radiance --without-pangoft2 \
-  --with-png-includes=${TARGET/include} --with-png-libraries=${TARGET}/lib \
-  --with-jpeg-includes=${TARGET/include} --with-jpeg-libraries=${TARGET}/lib
+  --with-png-includes=${TARGET/include} --with-png-libraries=${TARGET}/lib
 # https://docs.fedoraproject.org/en-US/packaging-guidelines/#_removing_rpath
 sed -i'.bak' 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 # Link libvips.so.42 statically into libvips-cpp.so.42
