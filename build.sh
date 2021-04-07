@@ -61,6 +61,9 @@ for flavour in darwin-x64 darwin-arm64v8; do
         export CHOST="aarch64-apple-darwin"
         export FLAGS+=" -arch arm64"
         export MESON="--cross-file=${PWD}/${PLATFORM}/meson.ini"
+
+        # Assumes Rust is already installed!
+        rustup target add aarch64-apple-darwin
       fi
 
       # macOS 11 is the version version to support ARM-based macs

@@ -198,13 +198,6 @@ if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
 
-if [ "$DARWIN" = true ]; then
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path -y
-  if [ "$DARWIN_ARM" = true ]; then
-    ${CARGO_HOME}/bin/rustup target add aarch64-apple-darwin
-  fi
-fi
-
 if [ "${PLATFORM%-*}" == "linuxmusl" ] || [ "$DARWIN" = true ]; then
   mkdir ${DEPS}/proxy-libintl
   $CURL https://github.com/frida/proxy-libintl/archive/${VERSION_PROXY_LIBINTL}.tar.gz | tar xzC ${DEPS}/proxy-libintl --strip-components=1
@@ -314,12 +307,12 @@ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" ./configure \
 make install-strip
 
 mkdir ${DEPS}/jpeg
-#$CURL https://github.com/mozilla/mozjpeg/archive/v${VERSION_MOZJPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
-$CURL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${VERSION_JPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
+$CURL https://github.com/mozilla/mozjpeg/archive/v${VERSION_MOZJPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
+#$CURL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${VERSION_JPEG}.tar.gz | tar xzC ${DEPS}/jpeg --strip-components=1
 cd ${DEPS}/jpeg
 LDFLAGS=${LDFLAGS/\$/} cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel \
   -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
-  ${TYPE_FLAGS_CMAKE} -DWITH_JPEG8=1 -DWITH_TURBOJPEG=FALSE -DPNG_SUPPORTED=FALSE
+  ${TYPE_SHARED:+-DENABLE_STATIC=0} ${TYPE_STATIC:+-DENABLE_SHARED=0} -DWITH_JPEG8=1 -DWITH_TURBOJPEG=FALSE -DPNG_SUPPORTED=FALSE
 make install/strip
 
 mkdir ${DEPS}/png16
@@ -538,8 +531,7 @@ PKG_CONFIG="pkg-config${TYPE_STATIC:+ --static}" CFLAGS="${CFLAGS} -O3" CXXFLAGS
   --disable-debug --disable-deprecated --disable-introspection --without-analyze --without-cfitsio --without-fftw \
   --without-matio --without-nifti --without-OpenEXR --without-openslide \
   --without-pdfium --without-ppm --without-radiance --without-pangoft2 \
-  --with-png-includes=${TARGET/include} --with-png-libraries=${TARGET}/lib \
-  --with-jpeg-includes=${TARGET/include} --with-jpeg-libraries=${TARGET}/lib
+  --with-png-includes=${TARGET/include} --with-png-libraries=${TARGET}/lib
 # https://docs.fedoraproject.org/en-US/packaging-guidelines/#_removing_rpath
 sed -i'.bak' 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 # Link libvips.so.42 statically into libvips-cpp.so.42
