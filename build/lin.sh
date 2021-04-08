@@ -141,7 +141,7 @@ VERSION_AOM=3.0.0
 VERSION_HEIF=1.11.0
 
 # Extra dependencies for Tropy
-VERSION_MAGICK="7.0.11-6"
+VERSION_MAGICK="6.9.12-6"
 VERSION_DE265=1.0.8
 VERSION_OPENJPEG=2.4.0
 VERSION_POPPLER=21.04.0
@@ -190,7 +190,7 @@ version_latest "de265" "$VERSION_DE265" "11239"
 version_latest "heif" "$VERSION_HEIF" "64439"
 version_latest "openjpeg" "$VERSION_OPENJPEG" "2550"
 version_latest "poppler" "$VERSION_POPPLER" "3686"
-version_latest "imagemagick" "$VERSION_MAGICK" "1372" # "16253"
+version_latest "imagemagick" "$VERSION_MAGICK" "16253"
 version_latest "jpeg" "$VERSION_JPEG" "1648"
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
@@ -495,19 +495,18 @@ LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" \
 make install/strip
 
 mkdir ${DEPS}/imagemagick
-#$CURL https://download.imagemagick.org/ImageMagick/download/releases/ImageMagick-${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
-$CURL https://github.com/ImageMagick/ImageMagick/archive/refs/tags/${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
+$CURL https://download.imagemagick.org/ImageMagick/download/releases/ImageMagick-${VERSION_MAGICK}.tar.gz | tar xzC ${DEPS}/imagemagick --strip-components=1
 cd ${DEPS}/imagemagick
 ./configure --host=${CHOST} --prefix=${TARGET} ${TYPE_FLAGS} \
   --enable-zero-configuration --without-modules --without-ltdl --disable-opencl \
   --disable-openmp --disable-dependency-tracking --disable-deprecated --disable-docs \
   --without-utilities --without-magick-plus-plus --without-perl \
-  --with-openjp2 --with-jbig \
+  --with-openjp2 \
   --without-fftw --without-fontconfig --without-freetype --without-gvc \
   --without-gslib --without-heic --without-lqr --without-lzma --without-openexr \
-  --without-pango --without-rsvg --without-webp --without-x --without-xml \
-  --without-png --without-jpeg --without-tiff \
-  --without-zip --without-zlib --without-zstd
+  --without-pango --without-raw --without-rsvg --without-webp --without-x --without-xml \
+  --without-png --without-jpeg --without-jbig --without-jxl --without-tiff \
+  --without-zip --without-zstd --without-djvu --without-bzlib --without-dps
 make install-strip
 
 mkdir ${DEPS}/vips
