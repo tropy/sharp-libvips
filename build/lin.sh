@@ -495,12 +495,14 @@ cd ${DEPS}/poppler/build
 sed -i'.bak' "/subdirectory(test)/d" ../CMakeLists.txt
 # Add libopenjp2 to pkg-config linker flags
 sed -i'.bak' "s/-lpoppler/& -lopenjp2/" ../poppler.pc.cmake
-LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib \
+LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" \
+  -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake \
+  -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=${TARGET}/lib -DCMAKE_PREFIX_PATH=${TARGET} \
   ${TYPE_FLAGS_CMAKE} -DCMAKE_BUILD_TYPE=release \
-  -DENABLE_ZLIB_UNCOMPRESS=OFF -DENABLE_LIBOPENJPEG=openjpeg2 -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF \
+  -DENABLE_ZLIB_UNCOMPRESS=OFF -DENABLE_LIBOPENJPEG=openjpeg2 -DENABLE_CMS=lcms2 -DENABLE_DCTDECODER=libjpeg \
+  -DENABLE_SPLASH=OFF -DENABLE_UTILS=OFF \
   -DENABLE_QT5=OFF -DENABLE_QT6=OFF -DENABLE_CPP=OFF -DENABLE_LIBCURL=OFF -DENABLE_GOBJECT_INTROSPECTION=OFF \
-  -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF -DBUILD_CPP_TESTS=OFF -DEXTRA_WARN=OFF \
-  -DPNG_LIBRARY=${TARGET}/lib/libpng16.so -DPNG_INCLUDE=${TARGET}/include
+  -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF -DBUILD_CPP_TESTS=OFF -DEXTRA_WARN=OFF
 make install/strip
 
 mkdir ${DEPS}/imagemagick
@@ -511,11 +513,12 @@ cd ${DEPS}/imagemagick
   --enable-zero-configuration --without-modules --without-ltdl --disable-opencl \
   --disable-openmp --disable-dependency-tracking --disable-deprecated --disable-docs \
   --without-utilities --without-magick-plus-plus --without-perl \
-  --with-openjp2 \
+  --with-openjp2 --with-jbig \
   --without-fftw --without-fontconfig --without-freetype --without-gvc \
   --without-gslib --without-heic --without-lqr --without-lzma --without-openexr \
   --without-pango --without-rsvg --without-webp --without-x --without-xml \
-  --without-zlib --without-zstd
+  --without-png --without-jpeg --without-tiff \
+  --without-zip --without-zlib --without-zstd
 make install-strip
 
 mkdir ${DEPS}/vips
@@ -575,11 +578,11 @@ function copydeps {
     [ ! -f "$PWD/$base_dep" ] && echo "$base_dep does not exist in $PWD" && continue
     echo "$base depends on $base_dep"
 
-    if [ ! -f "$dest_dir/$base_dep" ]; then
-      if [ "$DARWIN" = true ]; then
-        install_name_tool -change $dep @rpath/$base_dep $dest_dir/$base
-      fi
+    if [ "$DARWIN" = true ]; then
+      install_name_tool -change $dep @rpath/$base_dep $dest_dir/$base
+    fi
 
+    if [ ! -f "$dest_dir/$base_dep" ]; then
       # Call this function (recursive) on each dependency of this library
       copydeps $base_dep $dest_dir
     fi
@@ -633,7 +636,6 @@ printf "\"${PLATFORM}\"" >platform.json
 $CURL -O https://raw.githubusercontent.com/tropy/sharp-libvips/master/THIRD-PARTY-NOTICES.md
 
 # Create the tarball
-ls -al lib
 rm -rf lib
 mv lib-filtered lib
 rm -f ${PACKAGE}/libvips-${VERSION_VIPS}-${PLATFORM}.tar.{gz,br}
