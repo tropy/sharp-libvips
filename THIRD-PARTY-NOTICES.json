@@ -2,10 +2,7 @@
   {
     "name": "aom",
     "license": "BSD 2-Clause + Alliance for Open Media Patent License 1.0",
-    "url": [
-      "https://aomedia.googlesource.com/aom/+/refs/heads/master/LICENSE",
-      "https://aomedia.googlesource.com/aom/+/refs/heads/master/PATENTS"
-    ]
+    "url": "https://aomedia.org/license"
   },
   {
     "name": "cairo",
