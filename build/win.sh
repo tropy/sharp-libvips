@@ -46,7 +46,7 @@ cp bin/*.dll lib/
 printf "\"${PLATFORM}\"" >platform.json
 
 # Add third-party notices
-$CURL -O https://raw.githubusercontent.com/lovell/sharp-libvips/master/THIRD-PARTY-NOTICES.md
+$CURL -O https://raw.githubusercontent.com/tropy/sharp-libvips/master/THIRD-PARTY-NOTICES.json
 
 echo "Creating tarball"
 tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz \

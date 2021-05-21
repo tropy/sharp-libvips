@@ -1,0 +1,170 @@
+[
+  {
+    "name": "aom",
+    "license": "BSD 2-Clause + Alliance for Open Media Patent License 1.0",
+    "url": [
+      "https://aomedia.googlesource.com/aom/+/refs/heads/master/LICENSE",
+      "https://aomedia.googlesource.com/aom/+/refs/heads/master/PATENTS"
+    ]
+  },
+  {
+    "name": "cairo",
+    "license": "Mozilla Public License 2.0",
+    "url": "https://cgit.freedesktop.org/cairo/tree/COPYING"
+  },
+  {
+    "name": "expat",
+    "license": "MIT Licence",
+    "url": "https://github.com/libexpat/libexpat/blob/master/expat/COPYING"
+  },
+  {
+    "name": "fontconfig",
+    "license": "fontconfig Licence",
+    "url": "https://gitlab.freedesktop.org/fontconfig/fontconfig/blob/master/COPYING"
+  },
+  {
+    "name": "freetype",
+    "license": "freetype Licence",
+    "url": "https://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT"
+  },
+  {
+    "name": "fribidi",
+    "license": "LGPLv3",
+    "url": "https://raw.githubusercontent.com/fribidi/fribidi/master/COPYING"
+  },
+  {
+    "name": "gdk-pixbuf",
+    "license": "LGPLv3",
+    "url": "https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/raw/master/COPYING"
+  },
+  {
+    "name": "gettext",
+    "license": "GPLv3",
+    "url": "https://git.savannah.gnu.org/gitweb/?p=gettext.git;a=blob_plain;f=COPYING;hb=refs/heads/master"
+  },
+  {
+    "name": "giflib",
+    "license": "MIT Licence",
+    "url": "https://sourceforge.net/p/giflib/code/ci/master/tree/COPYING?format=raw"
+  },
+  {
+    "name": "glib",
+    "license": "LGPLv3",
+    "url": "https://gitlab.gnome.org/GNOME/glib/-/raw/master/COPYING"
+  },
+  {
+    "name": "harfbuzz",
+    "license": "MIT Licence",
+    "url": "https://raw.githubusercontent.com/harfbuzz/harfbuzz/master/COPYING"
+  },
+  {
+    "name": "imagemagick",
+    "license": "ImageMagick License",
+    "url": "https://raw.githubusercontent.com/ImageMagick/ImageMagick6/main/LICENSE"
+  },
+  {
+    "name": "lcms",
+    "license": "MIT Licence",
+    "url": "https://raw.githubusercontent.com/mm2/Little-CMS/master/COPYING"
+  },
+  {
+    "name": "libde265",
+    "license": "LGPLv3",
+    "url": "https://raw.githubusercontent.com/strukturag/libde265/master/COPYING"
+  },
+  {
+    "name": "libexif",
+    "license": "LGPLv3",
+    "url": "https://raw.githubusercontent.com/libexif/libexif/master/COPYING"
+  },
+  {
+    "name": "libffi",
+    "license": "MIT Licence",
+    "url": "https://raw.githubusercontent.com/libffi/libffi/master/LICENSE"
+  },
+  {
+    "name": "libgsf",
+    "license": "LGPLv3",
+    "url": "https://gitlab.gnome.org/GNOME/libgsf/-/raw/master/COPYING"
+  },
+  {
+    "name": "libheif",
+    "license": "LGPLv3",
+    "url": "https://raw.githubusercontent.com/strukturag/libheif/master/COPYING"
+  },
+  {
+    "name": "libimagequant",
+    "license": "BSD 2-Clause",
+    "url": "https://github.com/lovell/libimagequant/blob/main/COPYRIGHT"
+  },
+  {
+    "name": "mozjpeg",
+    "license": "zlib License, IJG License, BSD-3-Clause",
+    "url": "https://github.com/mozilla/mozjpeg/blob/master/LICENSE.md"
+  },
+  {
+    "name": "libpng",
+    "license": "libpng License",
+    "url": "https://github.com/glennrp/libpng/blob/master/LICENSE"
+  },
+  {
+    "name": "librsvg",
+    "license": "LGPLv3",
+    "url": "https://gitlab.gnome.org/GNOME/librsvg/-/raw/master/COPYING.LIB"
+  },
+  {
+    "name": "libspng",
+    "license": "BSD 2-Clause, libpng License",
+    "url": "https://github.com/randy408/libspng/blob/master/LICENSE"
+  },
+  {
+    "name": "libtiff",
+    "license": "libtiff License",
+    "url": "https://libtiff.gitlab.io/libtiff/misc.html"
+  },
+  {
+    "name": "libvips",
+    "license": "LGPLv3",
+    "url": "https://raw.githubusercontent.com/libvips/libvips/master/COPYING"
+  },
+  {
+    "name": "libwebp",
+    "license": "New BSD License",
+    "url": "https://chromium.googlesource.com/webm/libwebp/+/refs/heads/master/COPYING"
+  },
+  {
+    "name": "libxml2",
+    "license": "MIT Licence",
+    "url": "https://gitlab.gnome.org/GNOME/libxml2/-/raw/master/Copyright"
+  },
+  {
+    "name": "orc",
+    "license": "orc License",
+    "url": "https://gitlab.freedesktop.org/gstreamer/orc/blob/master/COPYING"
+  },
+  {
+    "name": "openjpeg",
+    "license": "BDS 2-Clause",
+    "url": "https://raw.githubusercontent.com/uclouvain/openjpeg/master/LICENSE"
+  },
+  {
+    "name": "pango",
+    "license": "LGPLv3",
+    "url": "https://gitlab.gnome.org/GNOME/pango/-/raw/master/COPYING"
+  },
+  {
+    "name": "pixman",
+    "license": "MIT Licence",
+    "url": "https://cgit.freedesktop.org/pixman/tree/COPYING"
+  },
+  {
+    "name": "poppler",
+    "license": "GPLv2",
+    "url": "https://gitlab.freedesktop.org/poppler/poppler/-/raw/master/COPYING"
+  },
+  {
+    "name": "zlib-ng",
+    "license": "zlib Licence",
+    "url": "https://github.com/zlib-ng/zlib-ng/blob/develop/LICENSE.md"
+  }
+]
