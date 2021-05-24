@@ -2,27 +2,29 @@
   {
     "name": "aom",
     "license": "BSD 2-Clause + Alliance for Open Media Patent License 1.0",
-    "url": "https://aomedia.org/license"
+    "url": [
+      "https://aomedia.googlesource.com/aom/+/refs/heads/master/LICENSE?format=TEXT",
+      "https://aomedia.googlesource.com/aom/+/refs/heads/master/PATENTS?format=TEXT"
   },
   {
     "name": "cairo",
     "license": "Mozilla Public License 2.0",
-    "url": "https://cgit.freedesktop.org/cairo/tree/COPYING"
+    "url": "https://raw.githubusercontent.com/freedesktop/cairo/master/COPYING"
   },
   {
     "name": "expat",
     "license": "MIT Licence",
-    "url": "https://github.com/libexpat/libexpat/blob/master/expat/COPYING"
+    "url": "https://raw.githubusercontent.com/libexpat/libexpat/master/expat/COPYING"
   },
   {
     "name": "fontconfig",
     "license": "fontconfig Licence",
-    "url": "https://gitlab.freedesktop.org/fontconfig/fontconfig/blob/master/COPYING"
+    "url": "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/raw/master/COPYING"
   },
   {
     "name": "freetype",
     "license": "freetype Licence",
-    "url": "https://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT"
+    "url": "https://gitlab.freedesktop.org/freetype/freetype/-/raw/master/LICENSE.TXT"
   },
   {
     "name": "fribidi",
@@ -33,11 +35,6 @@
     "name": "gdk-pixbuf",
     "license": "LGPLv3",
     "url": "https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/raw/master/COPYING"
-  },
-  {
-    "name": "gettext",
-    "license": "GPLv3",
-    "url": "https://git.savannah.gnu.org/gitweb/?p=gettext.git;a=blob_plain;f=COPYING;hb=refs/heads/master"
   },
   {
     "name": "giflib",
@@ -92,17 +89,17 @@
   {
     "name": "libimagequant",
     "license": "BSD 2-Clause",
-    "url": "https://github.com/lovell/libimagequant/blob/main/COPYRIGHT"
+    "url": "https://raw.githubusercontent.com/lovell/libimagequant/main/COPYRIGHT"
   },
   {
     "name": "mozjpeg",
     "license": "zlib License, IJG License, BSD-3-Clause",
-    "url": "https://github.com/mozilla/mozjpeg/blob/master/LICENSE.md"
+    "url": "https://raw.githubusercontent.com/mozilla/mozjpeg/master/LICENSE.md"
   },
   {
     "name": "libpng",
     "license": "libpng License",
-    "url": "https://github.com/glennrp/libpng/blob/master/LICENSE"
+    "url": "https://raw.githubusercontent.com/glennrp/libpng/libpng16/LICENSE"
   },
   {
     "name": "librsvg",
@@ -112,12 +109,12 @@
   {
     "name": "libspng",
     "license": "BSD 2-Clause, libpng License",
-    "url": "https://github.com/randy408/libspng/blob/master/LICENSE"
+    "url": "https://raw.githubusercontent.com/randy408/libspng/master/LICENSE"
   },
   {
     "name": "libtiff",
     "license": "libtiff License",
-    "url": "https://libtiff.gitlab.io/libtiff/misc.html"
+    "url": "https://gitlab.com/libtiff/libtiff/-/raw/master/COPYRIGHT"
   },
   {
     "name": "libvips",
@@ -137,7 +134,7 @@
   {
     "name": "orc",
     "license": "orc License",
-    "url": "https://gitlab.freedesktop.org/gstreamer/orc/blob/master/COPYING"
+    "url": "https://gitlab.freedesktop.org/gstreamer/orc/-/raw/master/COPYING"
   },
   {
     "name": "openjpeg",
@@ -152,7 +149,7 @@
   {
     "name": "pixman",
     "license": "MIT Licence",
-    "url": "https://cgit.freedesktop.org/pixman/tree/COPYING"
+    "url": "https://cgit.freedesktop.org/pixman/plain/COPYING"
   },
   {
     "name": "poppler",
@@ -160,8 +157,13 @@
     "url": "https://gitlab.freedesktop.org/poppler/poppler/-/raw/master/COPYING"
   },
   {
+    "name": "proxy-libintl",
+    "license": "LGPLv2",
+    "url": "https://raw.githubusercontent.com/frida/proxy-libintl/master/COPYING"
+  },
+  {
     "name": "zlib-ng",
     "license": "zlib Licence",
-    "url": "https://github.com/zlib-ng/zlib-ng/blob/develop/LICENSE.md"
+    "url": "https://raw.githubusercontent.com/zlib-ng/zlib-ng/develop/LICENSE.md"
   }
 ]

@@ -140,11 +140,11 @@ VERSION_AOM=3.1.1
 VERSION_HEIF=1.12.0
 
 # Extra dependencies for Tropy
-VERSION_MAGICK="6.9.12-6"
+VERSION_MAGICK="6.9.12-12"
 VERSION_DE265=1.0.8
 VERSION_OPENJPEG=2.4.0
-VERSION_POPPLER=21.04.0
-VERSION_JPEG=2.0.6
+VERSION_POPPLER=21.05.0
+# VERSION_JPEG=2.0.6
 
 # Remove patch version component
 without_patch() {
@@ -610,7 +610,6 @@ printf "{\n\
   \"heif\": \"${VERSION_HEIF}\",\n\
   \"imagequant\": \"${VERSION_IMAGEQUANT}\",\n\
   \"imagemagick\": \"${VERSION_MAGICK}\",\n\
-  \"jpeg\": \"${VERSION_JPEG}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"mozjpeg\": \"${VERSION_MOZJPEG}\",\n\
   \"orc\": \"${VERSION_ORC}\",\n\
