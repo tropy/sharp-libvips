@@ -11,6 +11,7 @@ ENV \
 
 # Build dependencies
 RUN \
+  ulimit -n 1024 && \
   yum update -y && \
   yum install -y epel-release centos-release-scl && \
   yum group install -y "Development Tools" && \
@@ -34,7 +35,7 @@ RUN \
 
 # Compiler settings
 ENV \
-  PKG_CONFIG="pkg-config --static" \
+  PKG_CONFIG="/usr/bin/pkg-config --static" \
   PLATFORM="linux-x64" \
   FLAGS="-march=x86-64-v2 -mtune=nehalem" \
   MESON="--cross-file=/root/meson.ini"
