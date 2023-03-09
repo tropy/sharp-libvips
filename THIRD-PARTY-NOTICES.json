@@ -1,0 +1,158 @@
+[
+  {
+    "name": "aom",
+    "license": "BSD 2-Clause + Alliance for Open Media Patent License 1.0",
+    "licenseURL": [
+      "https://aomedia.googlesource.com/aom/+/refs/heads/master/LICENSE?format=TEXT",
+      "https://aomedia.googlesource.com/aom/+/refs/heads/master/PATENTS?format=TEXT"
+    ]
+  },
+  {
+    "name": "cairo",
+    "license": "MPL-2.0",
+    "licenseURL": "https://raw.githubusercontent.com/freedesktop/cairo/master/COPYING"
+  },
+  {
+    "name": "expat",
+    "license": "MIT",
+    "licenseURL": "https://raw.githubusercontent.com/libexpat/libexpat/master/expat/COPYING"
+  },
+  {
+    "name": "fontconfig",
+    "license": "fontconfig Licence",
+    "licenseURL": "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/raw/master/COPYING"
+  },
+  {
+    "name": "freetype",
+    "license": "freetype Licence",
+    "licenseURL": "https://gitlab.freedesktop.org/freetype/freetype/-/raw/master/LICENSE.TXT"
+  },
+  {
+    "name": "fribidi",
+    "license": "LGPL-2.1",
+    "licenseURL": "https://raw.githubusercontent.com/fribidi/fribidi/master/COPYING"
+  },
+  {
+    "name": "gdk-pixbuf",
+    "license": "LGPL-2.1",
+    "licenseURL": "https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/raw/master/COPYING"
+  },
+  {
+    "name": "glib",
+    "license": "LGPL-2.1",
+    "licenseURL": "https://gitlab.gnome.org/GNOME/glib/-/raw/master/COPYING"
+  },
+  {
+    "name": "harfbuzz",
+    "license": "MIT",
+    "licenseURL": "https://raw.githubusercontent.com/harfbuzz/harfbuzz/master/COPYING"
+  },
+  {
+    "name": "lcms",
+    "license": "MIT",
+    "licenseURL": "https://raw.githubusercontent.com/mm2/Little-CMS/master/COPYING"
+  },
+  {
+    "name": "libde265",
+    "license": "LGPL-3.0",
+    "licenseURL": "https://raw.githubusercontent.com/strukturag/libde265/master/COPYING"
+  },
+  {
+    "name": "libexif",
+    "license": "LGPL-2.1",
+    "licenseURL": "https://raw.githubusercontent.com/libexif/libexif/master/COPYING"
+  },
+  {
+    "name": "libffi",
+    "license": "MIT",
+    "licenseURL": "https://raw.githubusercontent.com/libffi/libffi/master/LICENSE"
+  },
+  {
+    "name": "libheif",
+    "license": "LGPL-3.0",
+    "licenseURL": "https://raw.githubusercontent.com/strukturag/libheif/master/COPYING"
+  },
+  {
+    "name": "libimagequant",
+    "license": "BSD 2-Clause",
+    "licenseURL": "https://raw.githubusercontent.com/lovell/libimagequant/main/COPYRIGHT"
+  },
+  {
+    "name": "mozjpeg",
+    "license": "zlib License, IJG License, BSD-3-Clause",
+    "licenseURL": "https://raw.githubusercontent.com/mozilla/mozjpeg/master/LICENSE.md"
+  },
+  {
+    "name": "libpng",
+    "license": "libpng License",
+    "licenseURL": "https://raw.githubusercontent.com/glennrp/libpng/libpng16/LICENSE"
+  },
+  {
+    "name": "librsvg",
+    "license": "LGPL-2.1",
+    "licenseURL": "https://gitlab.gnome.org/GNOME/librsvg/-/raw/master/COPYING.LIB"
+  },
+  {
+    "name": "libspng",
+    "license": "BSD 2-Clause, libpng License",
+    "licenseURL": "https://raw.githubusercontent.com/randy408/libspng/master/LICENSE"
+  },
+  {
+    "name": "libtiff",
+    "license": "libtiff License",
+    "licenseURL": "https://gitlab.com/libtiff/libtiff/-/raw/master/COPYRIGHT"
+  },
+  {
+    "name": "libvips",
+    "license": "LGPL-2.1",
+    "licenseURL": "https://raw.githubusercontent.com/libvips/libvips/master/COPYING"
+  },
+  {
+    "name": "libwebp",
+    "license": "BSD-3-Clause",
+    "licenseURL": [
+      "https://chromium.googlesource.com/webm/libwebp/+/refs/heads/master/COPYING?format=TEXT",
+      "https://chromium.googlesource.com/webm/libwebp/+/refs/heads/master/PATENTS?format=TEXT"
+    ]
+  },
+  {
+    "name": "libxml2",
+    "license": "MIT",
+    "licenseURL": "https://gitlab.gnome.org/GNOME/libxml2/-/raw/master/Copyright"
+  },
+  {
+    "name": "orc",
+    "license": "orc License",
+    "licenseURL": "https://gitlab.freedesktop.org/gstreamer/orc/-/raw/master/COPYING"
+  },
+  {
+    "name": "openjpeg",
+    "license": "BDS 2-Clause",
+    "licenseURL": "https://raw.githubusercontent.com/uclouvain/openjpeg/master/LICENSE"
+  },
+  {
+    "name": "pango",
+    "license": "GPL-2.0",
+    "licenseURL": "https://gitlab.gnome.org/GNOME/pango/-/raw/master/COPYING"
+  },
+  {
+    "name": "pixman",
+    "license": "MIT",
+    "licenseURL": "https://cgit.freedesktop.org/pixman/plain/COPYING"
+  },
+  {
+    "name": "poppler",
+    "license": "GPL-2.0",
+    "licenseURL": "https://gitlab.freedesktop.org/poppler/poppler/-/raw/master/COPYING"
+  },
+  {
+    "name": "proxy-libintl",
+    "license": "LGPL-2.0",
+    "licenseURL": "https://raw.githubusercontent.com/frida/proxy-libintl/master/COPYING"
+  },
+  {
+    "name": "zlib-ng",
+    "license": "zlib Licence",
+    "licenseURL": "https://raw.githubusercontent.com/zlib-ng/zlib-ng/develop/LICENSE.md"
+  }
+]

@@ -56,10 +56,13 @@ for flavour in darwin-x64 darwin-arm64v8; do
     export FLAGS+=" -Werror=unguarded-availability-new"
 
     if [ $PLATFORM = "darwin-arm64v8" ]; then
-      # ARM64 builds work via cross compilation from an x86_64 machine
-      export CHOST="aarch64-apple-darwin"
-      export FLAGS+=" -target arm64-apple-macos11"
-      export MESON="--cross-file=$PWD/$PLATFORM/meson.ini"
+      if [ "$(uname -m)" != "arm64" ]; then
+        # ARM64 builds work via cross compilation from an x86_64 machine
+        export CHOST="aarch64-apple-darwin"
+        export FLAGS+=" -target arm64-apple-macos11"
+        export MESON="--cross-file=$PWD/$PLATFORM/meson.ini"
+      fi
+
       # macOS 11 Big Sur is the first version to support ARM-based macs
       export MACOSX_DEPLOYMENT_TARGET="11.0"
       # Set SDKROOT to the latest SDK available
