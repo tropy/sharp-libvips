@@ -22,10 +22,15 @@ case ${PLATFORM} in
     ;;
 esac
 
-FILENAME="vips-dev-${ARCH}-web-${VERSION_VIPS}-static.zip"
-URL="https://github.com/libvips/build-win64-mxe/releases/download/v${VERSION_VIPS}/${FILENAME}"
-echo "Downloading $URL"
-$CURL -O $URL
+FILENAME="vips-dev-${ARCH}-tropy-${VERSION_VIPS}.zip"
+
+if [ -f /packaging/$FILENAME ]; then
+  cp /packaging/$FILENAME $FILENAME
+else
+  URL="https://github.com/tropy/build-win64-mxe/releases/download/v${VERSION_VIPS}/${FILENAME}"
+  echo "Downloading $URL"
+  $CURL -O $URL
+fi
 unzip $FILENAME
 
 # Clean and zip
@@ -37,7 +42,7 @@ cp bin/*.dll lib/
 printf "\"${PLATFORM}\"" >platform.json
 
 # Add third-party notices
-$CURL -O https://raw.githubusercontent.com/lovell/sharp-libvips/main/THIRD-PARTY-NOTICES.md
+$CURL -O https://raw.githubusercontent.com/tropy/sharp-libvips/main/THIRD-PARTY-NOTICES.json
 
 echo "Creating tarball"
 tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz \
@@ -47,8 +52,7 @@ tar czf /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz \
   lib/libglib-2.0.lib \
   lib/libgobject-2.0.lib \
   lib/*.dll \
-  *.json \
-  THIRD-PARTY-NOTICES.md
+  *.json
 
 # Recompress using AdvanceCOMP, ~5% smaller
 advdef --recompress --shrink-insane /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz
@@ -60,4 +64,4 @@ gunzip -c /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz | brotli -o /pac
 chmod 644 /packaging/libvips-${VERSION_VIPS}-${PLATFORM}.tar.*
 
 # Remove working directories
-rm -rf lib include *.json THIRD-PARTY-NOTICES.md
+rm -rf lib include *.json
