@@ -180,7 +180,7 @@ version_latest "cairo" "$VERSION_CAIRO" "247"
 version_latest "fribidi" "$VERSION_FRIBIDI" "857"
 #version_latest "pango" "$VERSION_PANGO" "11783" https://gitlab.gnome.org/GNOME/pango/-/issues/760
 version_latest "rsvg" "$VERSION_RSVG" "5420"
-version_latest "aom" "$VERSION_AOM" "17628"
+#version_latest "aom" "$VERSION_AOM" "17628"
 version_latest "heif" "$VERSION_HEIF" "strukturag/libheif"
 version_latest "cgif" "$VERSION_CGIF" "dloebl/cgif"
 version_latest "de265" "$VERSION_DE265" "11239"
