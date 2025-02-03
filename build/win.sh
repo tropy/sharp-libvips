@@ -25,8 +25,8 @@ case ${PLATFORM} in
     ;;
 esac
 
-FILENAME="vips-dev-${ARCH}-web-${VERSION_VIPS}-static.zip"
-URL="https://github.com/libvips/build-win64-mxe/releases/download/v${VERSION_VIPS}/${FILENAME}"
+FILENAME="vips-dev-${ARCH}-tropy-${VERSION_VIPS}.zip"
+URL="https://github.com/tropy/build-win64-mxe/releases/download/v${VERSION_VIPS}/${FILENAME}"
 echo "Downloading $URL"
 $CURL -O $URL
 unzip $FILENAME
@@ -37,7 +37,7 @@ rm bin/libvips-cpp-42.dll
 cp bin/*.dll lib/
 
 # Add third-party notices
-$CURL -O https://raw.githubusercontent.com/lovell/sharp-libvips/main/THIRD-PARTY-NOTICES.md
+$CURL -O https://raw.githubusercontent.com/tropy/sharp-libvips/main/THIRD-PARTY-NOTICES.json
 
 echo "Creating tarball"
 tar czf /packaging/sharp-libvips-${PLATFORM}.tar.gz \
@@ -45,11 +45,10 @@ tar czf /packaging/sharp-libvips-${PLATFORM}.tar.gz \
   lib/glib-2.0 \
   lib/libvips.lib \
   lib/*.dll \
-  *.json \
-  THIRD-PARTY-NOTICES.md
+  *.json
 
 # Allow tarballs to be read outside container
 chmod 644 /packaging/sharp-libvips-${PLATFORM}.tar.*
 
 # Remove working directories
-rm -rf lib include *.json THIRD-PARTY-NOTICES.md
+rm -rf lib include *.json
