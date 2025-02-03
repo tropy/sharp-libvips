@@ -58,6 +58,10 @@ version_latest "rsvg" "$VERSION_RSVG" "5420" "unstable"
 version_latest "webp" "$VERSION_WEBP" "1761"
 version_latest "xml2" "$VERSION_XML2" "1783"
 version_latest "zlib-ng" "$VERSION_ZLIB_NG" "115592"
+version_latest "openjpeg" "$VERSION_OPENJPEG" "2550"
+version_latest "poppler" "$VERSION_POPPLER" "3686"
+version_latest "de265" "$VERSION_DE265" "11239"
+version_latest "raw" "$VERSION_RAW" "LibRaw/LibRaw"
 
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then
   echo "Dependency updates: ${UPDATES[*]}"
