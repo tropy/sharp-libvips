@@ -45,11 +45,7 @@ for flavour in darwin-x64 darwin-arm64v8; do
     export PKG_CONFIG="$(brew --prefix)/bin/pkg-config --static"
 
     # Earliest supported version of macOS
-    if [ $PLATFORM = "darwin-arm64v8" ]; then
-      export MACOSX_DEPLOYMENT_TARGET="11.0"
-    else
-      export MACOSX_DEPLOYMENT_TARGET="10.15"
-    fi
+    export MACOSX_DEPLOYMENT_TARGET="12.0"
 
     # Added -fno-stack-check to workaround a stack misalignment bug on macOS 10.15
     # See:
