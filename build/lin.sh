@@ -129,6 +129,10 @@ VERSION_AOM=3.11.0
 VERSION_HEIF=1.19.5
 VERSION_CGIF=0.4.1
 
+VERSION_DE265=1.0.15
+VERSION_OPENJPEG=2.5.3
+VERSION_POPPLER=24.04.0
+
 # Check for newer versions
 # Skip by setting the VERSION_LATEST_REQUIRED environment variable to "false"
 ALL_AT_VERSION_LATEST=true
@@ -177,6 +181,9 @@ version_latest "rsvg" "$VERSION_RSVG" "5420"
 version_latest "aom" "$VERSION_AOM" "17628"
 version_latest "heif" "$VERSION_HEIF" "64439"
 version_latest "cgif" "$VERSION_CGIF" "dloebl/cgif"
+version_latest "de265" "$VERSION_DE265" "11239"
+version_latest "openjpeg" "$VERSION_OPENJPEG" "2550"
+#version_latest "poppler" "$VERSION_POPPLER" "3686"
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then exit 1; fi
 
 # Download and build dependencies from source
@@ -259,6 +266,14 @@ AOM_AS_FLAGS="${FLAGS}" cmake -G"Unix Makefiles" \
   ..
 make install/strip
 
+mkdir ${DEPS}/de265
+$CURL https://github.com/strukturag/libde265/releases/download/v${VERSION_DE265}/libde265-${VERSION_DE265}.tar.gz | tar xzC ${DEPS}/de265 --strip-components=1
+cd ${DEPS}/de265
+CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" cmake -G"Unix Makefiles" \
+  -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=FALSE -DENABLE_ENCODER=FALSE -DENABLE_DECODER=FALSE
+make install/strip
+
 mkdir ${DEPS}/heif
 $CURL https://github.com/strukturag/libheif/releases/download/v${VERSION_HEIF}/libheif-${VERSION_HEIF}.tar.gz | tar xzC ${DEPS}/heif --strip-components=1
 cd ${DEPS}/heif
@@ -266,7 +281,7 @@ cd ${DEPS}/heif
 sed -i'.bak' "/^cmake_minimum_required/s/3.16.3/3.12/" CMakeLists.txt
 CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" cmake -G"Unix Makefiles" \
   -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=FALSE -DBUILD_TESTING=0 -DENABLE_PLUGIN_LOADING=0 -DWITH_EXAMPLES=0 -DWITH_LIBDE265=0 -DWITH_X265=0
+  -DBUILD_SHARED_LIBS=FALSE -DBUILD_TESTING=0 -DENABLE_PLUGIN_LOADING=0 -DWITH_EXAMPLES=0 -DWITH_LIBDE265=TRUE -DWITH_X265=0
 make install/strip
 
 mkdir ${DEPS}/jpeg
@@ -439,6 +454,51 @@ CFLAGS="${CFLAGS} -O3" meson setup _build --default-library=static --buildtype=r
   -Dtests=false
 meson install -C _build --tag devel
 
+mkdir -p ${DEPS}/openjpeg/build
+$CURL https://github.com/uclouvain/openjpeg/archive/v${VERSION_OPENJPEG}.tar.gz | tar xzC ${DEPS}/openjpeg --strip-components=1
+cd ${DEPS}/openjpeg/build
+LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" \
+  -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_PREFIX_PATH=${TARGET} -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=FALSE -DBUILD_CODEC=OFF
+make install/strip
+
+mkdir -p ${DEPS}/poppler/build
+$CURL https://gitlab.freedesktop.org/poppler/poppler/-/archive/poppler-${VERSION_POPPLER}/poppler-poppler-${VERSION_POPPLER}.tar.bz2 | tar xjC ${DEPS}/poppler --strip-components=1
+cd ${DEPS}/poppler/build
+LDFLAGS=${LDFLAGS/\$/} cmake .. -G"Unix Makefiles" \
+  -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake\
+  -DCMAKE_PREFIX_PATH=${TARGET} \
+  -DCMAKE_INSTALL_PREFIX=${TARGET} \
+  -DCMAKE_INSTALL_LIBDIR=lib \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=FALSE \
+  -DBUILD_CPP_TESTS=OFF \
+  -DBUILD_GTK_TESTS=OFF \
+  -DBUILD_QT5_TESTS=OFF \
+  -DBUILD_QT6_TESTS=OFF \
+  -DBUILD_MANUAL_TESTS=OFF \
+  -DENABLE_BOOST=OFF \
+  -DENABLE_CMS=lcms2 \
+  -DENABLE_CPP=OFF \
+  -DENABLE_DCTDECODER=libjpeg \
+  -DENABLE_GLIB=ON \
+  -DENABLE_GOBJECT_INTROSPECTION=OFF \
+  -DENABLE_GPGME=OFF \
+  -DENABLE_GTK_DOC=OFF \
+  -DENABLE_LIBCURL=OFF \
+  -DENABLE_LIBOPENJPEG=openjpeg2 \
+  -DENABLE_LIBPNG=ON \
+  -DENABLE_LIBTIFF=OFF \
+  -DENABLE_NSS3=OFF \
+  -DENABLE_QT5=OFF \
+  -DENABLE_QT6=OFF \
+  -DENABLE_UNSTABLE_API_ABI_HEADERS=ON \
+  -DENABLE_UTILS=OFF \
+  -DENABLE_ZLIB=ON \
+  -DENABLE_ZLIB_UNCOMPRESS=OFF \
+  -DEXTRA_WARN=OFF
+make install/strip
+
 mkdir ${DEPS}/vips
 $CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.xz | tar xJC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
@@ -464,7 +524,7 @@ sed -i'.bak' "/subdir('man')/{N;N;N;N;d;}" meson.build
 CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-library=shared --buildtype=release --strip --prefix=${TARGET} ${MESON} \
   -Ddeprecated=false -Dexamples=false -Dintrospection=disabled -Dmodules=disabled -Dcfitsio=disabled -Dfftw=disabled -Djpeg-xl=disabled \
   ${WITHOUT_HIGHWAY:+-Dhighway=disabled} -Dorc=disabled -Dmagick=disabled -Dmatio=disabled -Dnifti=disabled -Dopenexr=disabled \
-  -Dopenjpeg=disabled -Dopenslide=disabled -Dpdfium=disabled -Dpoppler=disabled -Dquantizr=disabled \
+  -Dopenslide=disabled -Dpdfium=disabled -Dquantizr=disabled \
   -Dppm=false -Danalyze=false -Dradiance=false \
   ${LINUX:+-Dcpp_link_args="$LDFLAGS -Wl,-Bsymbolic-functions -Wl,--version-script=$DEPS/vips/vips.map $EXCLUDE_LIBS"}
 meson install -C _build --tag runtime,devel
@@ -526,6 +586,7 @@ printf "{\n\
   \"cgif\": \"${VERSION_CGIF}\",\n\
   \"exif\": \"${VERSION_EXIF}\",\n\
   \"expat\": \"${VERSION_EXPAT}\",\n\
+  \"de265\": \"${VERSION_DE265}\",\n\
   \"ffi\": \"${VERSION_FFI}\",\n\
   \"fontconfig\": \"${VERSION_FONTCONFIG}\",\n\
   \"freetype\": \"${VERSION_FREETYPE}\",\n\
@@ -537,9 +598,11 @@ printf "{\n\
   \"imagequant\": \"${VERSION_IMAGEQUANT}\",\n\
   \"lcms\": \"${VERSION_LCMS2}\",\n\
   \"mozjpeg\": \"${VERSION_MOZJPEG}\",\n\
+  \"openjpeg\": \"${VERSION_OPENJPEG}\",\n\
   \"pango\": \"${VERSION_PANGO}\",\n\
   \"pixman\": \"${VERSION_PIXMAN}\",\n\
   \"png\": \"${VERSION_PNG16}\",\n\
+  \"poppler\": \"${VERSION_POPPLER}\",\n\
   \"proxy-libintl\": \"${VERSION_PROXY_LIBINTL}\",\n\
   \"rsvg\": \"${VERSION_RSVG}\",\n\
   \"spng\": \"${VERSION_SPNG}\",\n\
@@ -553,7 +616,7 @@ printf "{\n\
 printf "\"${PLATFORM}\"" >platform.json
 
 # Add third-party notices
-$CURL -O https://raw.githubusercontent.com/lovell/sharp-libvips/main/THIRD-PARTY-NOTICES.md
+$CURL -O https://raw.githubusercontent.com/tropy/sharp-libvips/main/THIRD-PARTY-NOTICES.json
 
 # Create the tarball
 ls -al lib
@@ -562,8 +625,7 @@ mv lib-filtered lib
 tar chzf ${PACKAGE}/libvips-${VERSION_VIPS}-${PLATFORM}.tar.gz \
   include \
   lib \
-  *.json \
-  THIRD-PARTY-NOTICES.md
+  *.json
 
 # Allow tarballs to be read outside container
 chmod 644 ${PACKAGE}/libvips-${VERSION_VIPS}-${PLATFORM}.tar.*
