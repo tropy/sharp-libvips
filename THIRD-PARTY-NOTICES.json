@@ -88,6 +88,14 @@
     "licenseURL": "https://raw.githubusercontent.com/lovell/libimagequant/main/COPYRIGHT"
   },
   {
+    "name": "LibRaw",
+    "license": "CDDL-1.0 or LGPL-2.1",
+    "licenseURL": [
+      "https://raw.githubusercontent.com/LibRaw/LibRaw/refs/heads/master/LICENSE.CDDL",
+      "https://raw.githubusercontent.com/LibRaw/LibRaw/refs/heads/master/LICENSE.LGPL"
+    ]
+  },
+  {
     "name": "mozjpeg",
     "license": "zlib License, IJG License, BSD-3-Clause",
     "licenseURL": "https://raw.githubusercontent.com/mozilla/mozjpeg/master/LICENSE.md"
