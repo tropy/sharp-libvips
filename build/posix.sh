@@ -214,6 +214,13 @@ cmake -G"Unix Makefiles" \
   -DBUILD_SHARED_LIBS=FALSE -DWITH_JPEG8=1 -DWITH_TURBOJPEG=FALSE -DPNG_SUPPORTED=FALSE
 make install/strip
 
+mkdir ${DEPS}/libraw
+$CURL https://www.libraw.org/data/LibRaw-${VERSION_LIBRAW}.tar.gz | tar xzC ${DEPS}/libraw --strip-components=1
+cd ${DEPS}/libraw
+CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" ./configure --host=${CHOST} --prefix=${TARGET} --enable-static --disable-shared --disable-dependency-tracking \
+  --disable-openmp --enable-jpeg --enable-zlib --enable-lcms --disable-examples
+make install-strip
+
 mkdir ${DEPS}/png
 $CURL https://github.com/pnggroup/libpng/archive/v${VERSION_PNG}.tar.gz | tar xzC ${DEPS}/png --strip-components=1
 cd ${DEPS}/png
@@ -438,7 +445,7 @@ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-l
   -Ddeprecated=false -Dexamples=false -Dintrospection=disabled -Dmodules=disabled -Dcfitsio=disabled -Dfftw=disabled -Djpeg-xl=disabled \
   ${WITHOUT_HIGHWAY:+-Dhighway=disabled} -Dorc=disabled -Dmagick=disabled -Dmatio=disabled -Dnifti=disabled -Dopenexr=disabled \
   -Dopenslide=disabled -Dpdfium=disabled -Dquantizr=disabled \
-  -Dopenjpeg=enabled -Dpoppler=enabled \
+  -Dopenjpeg=enabled -Dpoppler=enabled -Draw=enabled \
   -Dppm=false -Danalyze=false -Dradiance=false \
   ${LINUX:+-Dcpp_link_args="$LDFLAGS -Wl,-Bsymbolic-functions -Wl,--version-script=$DEPS/vips/vips.map $EXCLUDE_LIBS"}
 meson install -C _build --tag runtime,devel
@@ -511,6 +518,7 @@ printf "{\n\
   \"highway\": \"${VERSION_HWY}\",\n\
   \"imagequant\": \"${VERSION_IMAGEQUANT}\",\n\
   \"lcms\": \"${VERSION_LCMS}\",\n\
+  \"libraw\": \"${VERSION_LIBRAW}\",\n\
   \"mozjpeg\": \"${VERSION_MOZJPEG}\",\n\
   \"openjpeg\": \"${VERSION_OPENJPEG}\",\n\
   \"pango\": \"${VERSION_PANGO}\",\n\
