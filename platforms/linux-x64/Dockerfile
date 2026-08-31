@@ -21,7 +21,6 @@ RUN \
     autoconf \
     automake \
     bzip2 \
-    cmake \
     curl-devel \
     findutils \
     gcc-toolset-15-gcc \
@@ -39,6 +38,10 @@ RUN \
     tar \
     xz \
     && \
+  curl -sSfL https://github.com/Kitware/CMake/releases/download/v3.31.9/cmake-3.31.9-linux-x86_64.tar.gz | tar -xzv -C /opt/ && \
+    ln -s /opt/cmake-3.31.9-linux-x86_64/bin/cmake /usr/bin/cmake && \
+    ln -s /opt/cmake-3.31.9-linux-x86_64/bin/ctest /usr/bin/ctest && \
+    ln -s /opt/cmake-3.31.9-linux-x86_64/bin/cpack /usr/bin/cpack && \
   curl https://sh.rustup.rs -sSf | sh -s -- -y \
     --no-modify-path \
     --profile minimal \

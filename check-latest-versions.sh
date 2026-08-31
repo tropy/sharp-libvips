@@ -58,6 +58,12 @@ version_latest "uhdr" "$VERSION_UHDR" "375187"
 version_latest "webp" "$VERSION_WEBP" "1761"
 version_latest "xml2" "$VERSION_XML2" "1783"
 version_latest "zlib-ng" "$VERSION_ZLIB_NG" "115592"
+version_latest "openjpeg" "$VERSION_OPENJPEG" "2550"
+version_latest "poppler" "$VERSION_POPPLER" "3686"
+version_latest "de265" "$VERSION_DE265" "11239"
+version_latest "raw" "$VERSION_RAW" "LibRaw/LibRaw"
+version_latest "brotli" "$VERSION_BROTLI" "google/brotli"
+version_latest "jxl" "$VERSION_JXL" "libjxl/libjxl"
 
 if [ "$ALL_AT_VERSION_LATEST" = "false" ]; then
   echo "Dependency updates: ${UPDATES[*]}"
